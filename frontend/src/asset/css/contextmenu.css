@@ -1,0 +1,43 @@
+/*
+ * If you are making changes to this code, commit them separate to your work
+ * under bug #1276. Also understand that this code is used in multiple places
+ * throughout the site so be extremely mindful that you don't break something
+ * else while trying to get your thing to work. If you add it to something,
+ * put it in the list in the JS file so future developers know where to look
+ * to make sure their changes don't break them.
+ *
+ * If you need to change a style, do them in a separate stylesheet unless you
+ * are absolutely sure it's needed everywhere.
+ */
+
+.context-menu
+{
+    display: none;
+    z-index: 999999;
+    position: absolute;
+    background-color: #ddd;
+    border: 1px solid black;
+    padding: 6px 5px;
+    border-radius: 10px;
+}
+.display-block
+{
+    display: block;
+}
+.context-menu-icon
+{
+    width: 1em;
+}
+.context-menu hr
+{
+    margin: 1px;
+}
+.context-menu-item
+{
+    padding: 3px 7px;
+}
+.context-menu-item:hover
+{
+    background-color: #aaa!important;
+    border-radius: 10px;
+}

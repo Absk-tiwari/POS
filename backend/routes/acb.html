@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body { font-family:  cursive  }
+        .chosen-product {align-items:center; min-height:80px; background-color: #fff;}
+        .chosen-product .w-100{ justify-content: space-between; }
+        .row.d-flex {
+            justify-content:space-between
+        }
+        @media (max-width:250px) {
+            *{
+                font-size: 10px;
+            }
+        }
+        /* @media print { */
+            #receipt {
+                width: calc(100vw + 6px);
+                                    border: 4px dashed gray;
+                    border-radius: 15px;
+                            }
+            .receipt{width:90%;background:#fff;margin-left:5%}
+            .head img{ margin-left: calc(50% - 50px); }
+            .head { border-bottom: 2px solid black; }
+            .head p:first-child{ border-bottom: 1px solid black; }
+            .d-grid p { text-align: center;}
+            .foot div:first-child{ border-top: 1px dashed gray; }
+            img { height:50px!important; width:100px!important }
+            .total { display: flex; justify-content: space-between; }
+            .chosen-product { margin-top: 10px; }
+            .chosen-product .w-100 { display: flex; justify-content:space-between; margin: 0px!important;padding: 0!important; }
+            .chosen-product p:not(:nth-child(3)){ padding: 0px; margin:0!important }
+            .chosen-product:nth-child(3) {border-top: 1px dashed gray;padding-top:10px}
+            .chosen-product:nth-child(1) {border-bottom: 1px dashed gray;padding-bottom:10px}
+            /* @page { margin-top: 10vh;margin-bottom: 0; align-items:center;  place-items: center; display: grid; } */
+            @page{margin:0px!important}
+        /* } */
+
+    </style>
+  </head>
+  <body>
+    <div class="d-grid" style="place-content: center; width:100%;">
+      <div id="receipt"
+        style="width:auto; border-radius: 15px;border:3px dashed gray; ">
+        <div
+          style="background-color: white;padding-bottom:40px;border-radius:15px">
+          <div class="row">
+            <div class="d-grid text-center w-100 head"
+              style="justify-content:center;width:100%;">
+              <img src="https://pos.dftech.in/images/pos.png">
+
+              <p> X - Report </p>
+
+            </div>
+          </div>
+          <div class="row">
+            <div class="receipt">
+              <div class="row mt-2 chosen-product">
+
+                <div class="w-100 d-flex">
+                  <p> Opening Cash :</p> <p> € 50 </p>
+                </div>
+                <div class="w-100 d-flex">
+                  <p> Closing Cash :</p> <p> 2,209.45 </p>
+                </div>
+                <div class="w-100 d-flex">
+                  <p> Report Date :</p> <p> 27/08/2025 </p>
+                </div>
+                <div class="w-100 d-flex">
+                  <p> Report Time :</p> <p>12:47 PM</p>
+                </div>
+                <div class="w-100 d-flex">
+                  <p style="padding-top:15px">Transactions :</p> <p
+                    style="padding-top:15px">121</p>
+                </div>
+                <div class="w-100 d-flex">
+                  <p>Total Products :</p> <p>518</p>
+                </div>
+                <div class="w-100 d-flex">
+                  <p>Returns :</p> <p>0</p>
+                </div>
+                <!--<div class="w-100 d-flex">-->
+                <!--    <p> Discounts :</p> <p>0</p>-->
+                <!--</div>-->
+                <div class="w-100 d-flex">
+                  <p>Cash :</p> <p>497.51</p>
+                </div>
+                <div class="w-100 d-flex">
+                  <p>Card :</p> <p>1,555.82</p>
+                </div>
+                <div class="w-100 d-flex">
+                  <p>Account :</p> <p>106.12</p>
+                </div>
+                <div class="w-100 d-flex" style="border-bottom:1px dashed gray">
+                  <p> Tax :</p> <p>0.00</p>
+                </div>
+                <br>
+                <strong style="text-align:center;"> Taxes </strong>
+                <div style="border-bottom:1px dashed gray;padding-bottom:5px">
+                  <div class="w-100 d-flex">
+                    <p> VAT :</p>
+                    <p> 0% </p>
+                  </div>
+                  <div class="w-100 d-flex">
+                    <p> Other :</p>
+                    <p> 9% </p>
+                  </div>
+                  <div class="w-100 d-flex">
+                    <p> 9% :</p>
+                    <p> VAT </p>
+                  </div>
+                </div>
+
+                <br>
+                <b style="text-align:center">Department Sales</b>
+                <div class="row chosen-product mb-0">
+                  <table style="width: 100%;">
+                    <thead>
+                      <tr>
+                        <td><b>Type</b></td>
+                        <td><b>Quantity</b></td>
+                        <td><b>Amount</b></td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td> Ready-to-Eat Meals :</td>
+                        <td> 2 </td>
+                        <td> 1.98 </td>
+                      </tr>
+                      <tr>
+                        <td> Frozen Foods :</td>
+                        <td> 8 </td>
+                        <td> 9.98 </td>
+                      </tr>
+                      <tr>
+                        <td> Spices &amp; Condiments :</td>
+                        <td> 6 </td>
+                        <td> 1.95 </td>
+                      </tr>
+                      <tr>
+                        <td> Snacks :</td>
+                        <td> 5 </td>
+                        <td> 0.99 </td>
+                      </tr>
+                      <tr>
+                        <td> Instant Mix :</td>
+                        <td> 3 </td>
+                        <td> 2.95 </td>
+                      </tr>
+                      <tr>
+                        <td> Vegetables :</td>
+                        <td> 28 </td>
+                        <td> 4.85 </td>
+                      </tr>
+                      <tr>
+                        <td> Beverages :</td>
+                        <td> 32 </td>
+                        <td> 2.99 </td>
+                      </tr>
+                      <tr>
+                        <td> Pickles Sauces Canned Food :</td>
+                        <td> 4 </td>
+                        <td> 5.00 </td>
+                      </tr>
+                      <tr>
+                        <td> Others :</td>
+                        <td> 430 </td>
+                        <td> 1,862.25 </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="foot">
+                <div class="row d-flex">
+                  <div class="total">
+                    <h2>TOTAL </h2>
+                    <h2> 2,159.45 </h2>
+                  </div>
+                </div>
+                <div class="row d-flex mt-0">
+                  <div>
+                    <small> Generated On </small>
+                    <small> 27 Aug, 2025 12:47 PM </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+        window.onload=function()
+        {
+            window.print()
+        }
+    </script>
+  </body>
+</html>
