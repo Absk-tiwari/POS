@@ -23,3 +23,27 @@ export const productLabelStyle = {
     height: '145px',
     width: '145px'
 }
+
+export const QR = {
+    height:180,
+    width:180
+}
+
+export const cFont = {
+    fontWeight:900,
+    padding:15
+}
+
+export const sCfont = {
+    fontSize:28
+}
+
+export const basePOS = {
+    height:'69vh',
+    placeContent:'center',
+    display:'grid',
+    placeItems:'center',
+    width:'100%',
+    backgroundColor: '#dadada',
+    marginTop:'5%'
+}

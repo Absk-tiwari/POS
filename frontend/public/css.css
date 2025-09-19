@@ -20479,7 +20479,7 @@ dl li:not(.select2-results li) {
 
 .navbar .navbar-brand-wrapper {
     width: 98px;
-    padding: 18px 35px
+    padding: 12px 35px
 }
 
 @media(max-width:991px) {
@@ -20575,7 +20575,7 @@ dl li:not(.select2-results li) {
     padding-top: 30px;
     padding-bottom: 25px;
     width: calc(100% - 98px);
-    height: 75px
+    height: 60px
 }
 
 @media(max-width:991px) {
@@ -22395,9 +22395,10 @@ td{font-size:1.1rem!important;}
 }
 
 .category-item {
-    padding: 12px 16px;
-    margin-left: 15px;
-    cursor: pointer;
+    padding:10px 20px;
+    margin-left:15px;
+    cursor:pointer;
+    border-radius:15px;
 }
 
 div.cell {
@@ -22467,7 +22468,7 @@ div.cell {
     font-size: 0.7rem;
 }
 .action-visible {
-    height: 48vh !important;
+    height: 45vh !important;
 }
 .put-here .row {
     cursor: pointer
@@ -22475,7 +22476,7 @@ div.cell {
 .chosen-product {
     align-items: center;
     border-radius: 10px;
-    min-height: 80px;
+    min-height: 70px;
     border: 2px dashed gray;
     background-color: #fff;
     position: relative
@@ -22497,19 +22498,19 @@ div.cell {
 }
 .chosen-product .btn:not(.mdi-) {
     right: 0;
-    bottom: 0;
+    bottom: -10px;
     border-radius: 50%;
     position: absolute
 }
 .chosen-product .btn.mdi- {
     right: 100px;
-    bottom: 0;
+    bottom: -10px;
     border-radius: 50%;
     position: absolute
 }
 .chosen-product .btn.add {
     right: 60px;
-    bottom: 0;
+    bottom: -10px;
     border-radius: 50%;
     position: absolute
 }
@@ -22581,7 +22582,7 @@ div.parent {
 .chosen-product.receipt {
     align-items: center;
     border-radius: 10px;
-    min-height: 80px
+    min-height: 60px
 }
 .choosen-product .w-100 {
     justify-content: space-between;
@@ -22711,6 +22712,44 @@ body::-webkit-scrollbar {
     background-color: #efefef !important
 }
 .toShow{display:none}  .viewer-toolbar ul{font-size:0rem}
-.fully-visible { height:78vh!important }
+.fully-visible { height:80vh!important }
 .tax-table-receipt td, .tax-table-receipt th { padding:0.3rem 1rem!important }
-.foot-btn {border:1px solid gray!important}.numeric .hg-button{height:55px!important}
+.foot-btn {font-size:1rem;border:1px solid gray!important;}.numeric .hg-button{height:55px!important}
+.bg-customer {
+    background: url(images/bg-customer.jpeg);
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+@media screen and (max-width: 1088px) {
+  /* Your styles go here */
+  .cell .w-100 {
+    padding: 1px!important;
+  }
+  .calc {
+    padding:4px!important;
+  }
+  .category-item{
+    padding:6px 10px!important;
+  }
+  .chosen-product {
+    min-height:60px;
+  }
+  .fs-3.btn, .container .d-flex .btn {
+    line-height:0!important;
+  }
+  span.quantity, span.ms-3 {
+    font-size:0.875rem;
+  }
+  .navbar .navbar-menu-wrapper, .category.row {
+    height:50px;
+  }
+  .pos-panel.w-100 {
+    margin-top:-20px;
+  }
+  .cell .w-100:last-child {
+    min-height:30px!important;
+  }
+}
+.btn-outline {
+    border: 1px solid black;
+}

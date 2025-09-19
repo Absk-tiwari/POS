@@ -113,7 +113,8 @@ const Products = () => {
                 headers: {
                     'Accept': 'application/json',
                     "Content-Type" : "multipart/form-data",
-                    'pos-token' : localStorage.getItem('pos-token')
+                    'pos-token' : localStorage.getItem('pos-token'),
+                    'Authorization': localStorage._pos_app_key
                 }
             });
             if(data.status) {

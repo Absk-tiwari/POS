@@ -28,7 +28,7 @@ const FullLayout = () => {
         { isLoggedIn && location.pathname !=='/disconnected' && <Navbar/> }
         <div className={`container1 page-body-wrapper w-100 ${location.pathname==='/dashboard'? 'home':''}`} style={{
                 minHeight: location.pathname==='/login'? 0 :'100vh',
-                paddingTop: location.pathname==='/login'? 0 :76
+                paddingTop: location.pathname==='/login'? 0 :60
             }}>
             <div className={`${['/pos','/pos/customer','/pos/'].includes(location.pathname)? 'pos-panel':'main-panel'} w-100 ${location.pathname==='/login'?'login':''} ${location.pathname.indexOf('payment')!==-1 ? 'payment-screen':''}`} >
                 <Outlet />

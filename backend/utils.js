@@ -215,6 +215,40 @@ const uploadToServer = async (formData, axios) => {
     }
 }
 
+const queueProduct = async (path, axios, request) => {
+    try 
+    {
+        if(!request.header('Authorization')){
+            return {
+                status: false,
+                message: "Application key not specified"
+            };
+        }
+        const payload = {
+            barCode: request.body.barcode?? request.body.code,
+            name: request.body.name,
+            price: request.body.price,
+            quantity: request.body.quantity?? 5000,
+            tax: request.body.tax??'0%',
+            category: request.body.catName?? "",
+            synced: true
+        }
+        const {data} = await axios.post(`${process.env.REMOTE_SERVER + path}`, payload, {
+            headers: {
+                "Accept": "application/json",
+                "Authorization": request.header('Authorization')
+            }
+        })
+        return data;
+
+    } catch (error) {
+        return {
+            status:false,
+            exception: error.message
+        }
+    }
+}
+
 module.exports = { 
     normalizeSpaces, 
     getCurrentDate, 
@@ -222,5 +256,6 @@ module.exports = {
     uploadFile, 
     getRandomHexColor, 
     europeanDate,
-    uploadToServer
+    uploadToServer,
+    queueProduct
 };

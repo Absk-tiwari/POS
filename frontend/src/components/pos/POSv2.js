@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useRef, useState } from 'react'; 
+import { memo, useEffect, useRef, useState } from 'react'; 
 import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import CreatableSelect from 'react-select/creatable'
@@ -13,14 +13,18 @@ import Category from './Category';
 import Products from './Products';
 // import logo from '../../asset/images/logo.png'
 import logo from '../../asset/images/sardar-logo.png';
+import insta from '../../asset/images/insta-sardarji.png';
+import whatsapp from '../../asset/images/whatsapp-sardarji.png';
+import fb from '../../asset/images/fb-sardarji.png';
 import { footerStyle, innerStyle, outerStyle, upperStyle } from '../../objects/keyboard/keyboardStyle';
 import { lowerCase, numeric0, numPad, upperCase } from '../../objects/keyboard/layouts';
 import { Button } from '../layouts/Button';
+import { basePOS, cFont, QR, sCfont } from '../../objects/styles';
 
 let noCodeProducts=[]
 
 const CalcButton = ({onClick=()=>{}, disabled, text, style}) => {
-    return <div className="col-sm-3 calc" key={text} onClick={onClick}>
+    return <div className="col-sm-3 calc" onClick={onClick}>
             <button className="btn btn-light num w-100 text-dark" 
             disabled={disabled} 
             style={style}> 
@@ -28,6 +32,11 @@ const CalcButton = ({onClick=()=>{}, disabled, text, style}) => {
         </button>
     </div>
 }
+const defPosition = {
+    x: window.screen.availWidth / 2.9,
+    y: window.screen.availHeight / 2
+}
+
 function POS() {
 
     const cRef = useRef(null);
@@ -86,7 +95,8 @@ function POS() {
     const [ focusedVeg, setFocusedVeg] = useState('');
 
     const fillCustom = e => {
-        if(['price', 'name', 'barcode', 'stock'].includes(focusedCustom)) {
+        const included = /^(?:price|barcode|stock|name)$/;
+        if(included.test(focusedCustom)) {
             setCustom({...custom, [focusedCustom]: focusedCustom==='price'? formatAmount(e): e});
         }
         if(focusedCustom!== 'price' && focusedCustom!== 'stock') setLayout(e.length === 0 ? "shift": "default")
@@ -143,10 +153,7 @@ function POS() {
         }
     }
 
-    const [ position, setPosition ] = useState({ 
-        x: window.screen.availWidth/3, 
-        y: window.screen.availHeight - 500
-    });
+    const [ position, setPosition ] = useState(defPosition);
     const [ dragging, setDragging ] = useState(false);
     const [ offset, setOffset ] = useState({ x: 0, y: 0 });
     const [ layout, setLayout ] = useState('shift');
@@ -193,7 +200,6 @@ function POS() {
             }
         };
         window.addEventListener("keydown", handleKeyDown);
-        // return () => window.removeEventListener("keydown", handleKeyDown);
     }, [barcode]);
 
     useEffect(()=> {
@@ -268,27 +274,20 @@ function POS() {
         if(!cat && cat!== 'null') {
             cat = product.catName
         }
-        //( if it has category & it's between vegetables or sweets then also if it is paneer product then ) + should not be  
-        if(cat && (['vegetables','sweets','fruits'].includes( cat?.trim().toLowerCase()) || (product.name.toLowerCase()==='paneer')) ) {
+        const included = /^(?:Fresh|Topop Voucher|Habesha|Vegetables|Vegetable|Green Vegetables|Paneer)$/i;
+        console.log(cat, cat.length)
+        //( if it has category & it's between regex then ) + should not be  
+        if( cat && included.test(cat)) {
+            // ,'sweets','fruits'
+            if(!vegetable) {
 
-            if(!vegetable) { // (!cartProducts[activeSession]?.find(i => i.id === prID))
-
-                if(inventory && (availableStocks[product.id] === 0 || parseInt(product.quantity) === 0)) return toast("sad f sd");
+                if(inventory && (availableStocks[product.id] === 0 || parseInt(product.quantity) === 0)) return;
                 // only return if both meet with inventory off (correction);
-                product = {...product, stock:'1'};
+                product = {...product, stock:'1', price: '0.00'};
                 if(!sale) { // prepare it for return if return mode is onn;
                     product = {...product, return: true };
                 }
                 return setVegetable(product);
-
-            } else {
-                
-                // if(split) {
-                //     if(prID) {
-                //         product = {...product, stock:'1'};
-                //         return setVegetable(product);
-                //     }
-                // }
 
             }
 
@@ -297,7 +296,8 @@ function POS() {
         const copyKartProducts = JSON.parse(JSON.stringify(KartProducts));
         let thisProduct = copyKartProducts[activeSession]?.find(ite => ite.id === prID);
         // check if the product is already in cart;
-        if( thisProduct && !split ) {
+        // new check added it should not be vegetable
+        if( thisProduct && !split && !['vegetables','sweets','fruits'].includes( cat?.trim().toLowerCase()) ) {
 
             let canAdd= thisProduct.quantity - availableStocks[prID];
             canAdd = canAdd < 1 ? canAdd : 1;
@@ -550,16 +550,6 @@ function POS() {
         return () => setAvailableStocks({})
     },[location, cartStocks])
  
-    const base = {
-        height:'69vh',
-        placeContent:'center',
-        display:'grid',
-        placeItems:'center',
-        width:'100%',
-        backgroundColor: '#dadada',
-        marginTop:'5%'
-    }
-
     const addCustomProduct = async e => 
     {
         e.preventDefault();
@@ -570,6 +560,7 @@ function POS() {
         fd.append('quantity', custom.stock);
         fd.append('image', custom.image);
         fd.append('tax', custom.tax);
+        fd.append('catName', custom.catName);
         fd.append('category_id', custom.category_id);
         if(!custom.name || !custom.price ) {
             return Warning('Fill the required fields');
@@ -577,16 +568,21 @@ function POS() {
         if(custom.name?.toLowerCase().indexOf('veg') === -1 && !custom.barcode) {
             return Warning("Barcode is required!")
         }
+        const regex = /^(?:Fresh|Topop Voucher|Habesha|Vegetables|Vegetable|Green Vegetables)$/i;
+        if(!regex.test(custom.catName)) {
+            return Warning("Barcode is required!"); 
+        }
 
         dispatch({ type:'LOADING' })
         const {data} = await axios.post(`/products/create-custom`, fd, {
             headers:{ 
                 "Accept" :"application/json",
                 "Content-Type" : "multipart/form-data",
-                "pos-token" : localStorage.getItem('pos-token')
+                "pos-token" : localStorage.getItem('pos-token'),
+                "Authorization": localStorage._pos_app_key
             }
         });
-        dispatch({ type:'STOP_LOADING' });
+        dispatch({ type: "STOP_LOADING" });
         if( data.status ) {
             setInitialProducts(prev => [...prev, data.product]);
             dispatch(
@@ -653,6 +649,14 @@ function POS() {
         window.electronAPI?.onDataReceived(handleDataReceived)
 
     }, []);
+
+    useEffect(()=>{
+        if(type==='customer') {
+            document.body.classList.add('bg-customer')
+        } else {
+            document.body.classList.remove('bg-customer')
+        }
+    },[type])
 
     const showTotal = (tax=false) => {
         
@@ -867,25 +871,15 @@ function POS() {
                         width: type === 'customer'?'40vw':'38.8%'
                     }}
                 >
-                    {
-                        type==='customer' && <div>
-                            <h2 className='text-center' style={{ fontSize:'3rem', fontWeight:'900' }}>
-                            { currency + ' ' + showTotal()} 
-                            </h2>
-                        </div>
-                    }
-                    { sessions.map( session => (<div key={session} ref={sectionRef} className={`container ms-2 put-here ${activeSession===session?'':'d-none'} ${KartProducts[activeSession] && KartProducts[activeSession].length && type!=='customer' ?'action-visible':''} ${minned ? "fully-visible":""}`} 
-                        style={{
-                            borderRadius:'20px',
-                            backgroundColor:'#dadada'
-                        }}>
-                        <div className={`card ${KartProducts[activeSession] && KartProducts[activeSession].length? 'd-none':''}`} style={base}>
-                            <i className={`fa-solid fa-cart-shopping`} style={{fontSize:'60px'}} />
-                            <b className={`mt-3`}> Start adding products </b>
+                    { type!=='customer' ?
+                    sessions.map( session => (
+                    <div key={session} ref={sectionRef} className={`container ms-2 put-here ${activeSession===session?'':'d-none'} ${KartProducts[activeSession] && KartProducts[activeSession].length && type!=='customer' ?'action-visible':''} ${minned ? "fully-visible":""}`} style={{borderRadius:'20px',backgroundColor:'#dadada'}}>
+                        <div className={`card ${KartProducts[activeSession] && KartProducts[activeSession].length?'d-none':''}`} style={basePOS}>
+                            <i className='fa-solid fa-cart-shopping' style={{fontSize:60}}/><b className={`mt-3`}>Start adding products</b>
                         </div>
                         { KartProducts[activeSession] && KartProducts[activeSession].map( (item,index) => (
                             <div key={index}
-                                className={`row chosen-product mt-2 ${currentProduct===index && 'selected'} ${item.other?' other-product ':''}`} 
+                                className={`row chosen-product mt-1 ${currentProduct===index && 'selected'} ${item.other?' other-product ':''}`}
                                 data-id={item.id}
                                 data-index={index}
                                 onClick={()=>setCurrent(index)}
@@ -909,10 +903,10 @@ function POS() {
                                 </div>
                                 { type!=='customer' && <div className='d-flex'>
                                     <span 
-                                        className={(currentProduct===index && !item.return && theme==='retro'? "text-white": "") + ' fs-3 btn mdi-'}>
+                                        className={(currentProduct===index && !item.return && theme==='retro'?"text-white":'') + ' fs-3 btn mdi-'}>
                                         <i data-index={index} onClick={()=> reduceQt(index) } className="mdi mdi-minus"/>
                                     </span>
-                                    <span className={(currentProduct===index && !item.return && theme==='retro'? "text-white": "") + ' fs-3 btn add'}>
+                                    <span className={(currentProduct===index && !item.return && theme==='retro'?"text-white":'') + ' fs-3 btn add'}>
                                         <i data-index={index} onClick={()=> increaseQt(index)} className="mdi mdi-plus"/>
                                     </span>
                                     <button className={`${theme==='retro' && currentProduct===index && !item.return ? "text-white":''} btn`}
@@ -924,8 +918,37 @@ function POS() {
                         ))}
 
                     </div>))
+                    : <div className='library d-grid justify-content-center align-items-center w-100 h-100' style={{placeItems:'end'}}>
+                        <div style={{cssText:"width:80%!important;text-align:center"}}>
+                            <div style={{border:'1px solid'}}>
+                                <h2 className='text-center' style={{ fontSize:'3rem', fontWeight:'900', padding:'6px 0px' }}>
+                                Total is &nbsp;&nbsp;{ currency + showTotal()} 
+                                </h2>
+                            </div>
+                            <img src={logo} alt={''} style={{height:176,marginTop:10}}/>
+                            <div style={{width:'100%'}}>
+                                <div style={{textAlign:'center',marginTop:10}}>
+                                    <div style={{textTransform:'uppercase'}}>
+                                        <h3 style={{ paddingTop:10,fontWeight:650,wordSpacing:5 }}>
+                                            &#x1F6D2; Grote Berg 38 5611 KL Eindhoven, Netherlands <br/>
+                                            <div className="d-flex w-100" style={{justifyContent:'space-evenly'}}>
+                                            &#x260E;:040-7850081 
+                                            Mob:06-26233599
+                                            </div>
+                                        </h3>
+                                    </div>
+                                    <h4 style={{fontWeight:650}}>
+                                        <b>Email: indianfoodstore.eindhoven@gmail.com</b>
+                                    </h4>
+                                    <h3 style={{textTransform:'uppercase'}}>
+                                        <b>www.Sardarji.nl</b>
+                                    </h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     }
-                    <div className={`container ms-2 mt-3 actionBar ${KartProducts[activeSession] && KartProducts[activeSession].length && type!=='customer' ? '':'d-none'}`} style={{height: '54vh'}}>
+                    <div className={`container ms-2 mt-2 actionBar ${KartProducts[activeSession] && KartProducts[activeSession].length && type!=='customer' ? '':'d-none'}`} style={{height: '54vh'}}>
                         <div className="row">
                             <div className="col-sm-12 d-flex">
                                 <div className="col-sm-6 d-flex">
@@ -945,7 +968,7 @@ function POS() {
                                         <p style={{lineHeight:2.1,whiteSpace:'nowrap'}}>
                                             <b> Total: &nbsp;
                                                 <span className="total-amount" style={{left:0,fontSize:'2.3rem'}}>
-                                                    {currency} { showTotal() }
+                                                    { (currency+showTotal()).replace(" ",'') }
                                                 </span>
                                             </b>
                                         </p>
@@ -955,17 +978,17 @@ function POS() {
                         </div>
                         <div className={`div indicator ${minned ? 'd-none':''}`}>
                             <div className="row mt-1">
-                                {[1,2,3].map( it=> <CalcButton onClick={e=>changeInput(it,e)} disabled={!editing && !editingQT} style={btnStyle} text={it}/>)}
-                                <div className="col-sm-3" onClick={resetCart}>
-                                    <button className="btn btn-light num w-100 text-dark" type="button" style={{...btnStyle,padding:10}}> <b>Cancel Sale</b> </button>
+                                {[1,2,3].map( it=> <CalcButton key={it} onClick={e=>changeInput(it,e)} disabled={!editing && !editingQT} style={btnStyle} text={it}/>)}
+                                <div className="col-sm-3 calc" onClick={resetCart}>
+                                    <button className="btn btn-light num w-100 text-dark" type="button" style={{...btnStyle,padding:5}}> Cancel Sale </button>
                                 </div>
                             </div>
                             <div className="row mt-1">
-                                { [4,5,6].map( it=> <CalcButton disabled={!editing && !editingQT} style={btnStyle} text={it} onClick={e=>changeInput(it,e)}/>)}
+                                { [4,5,6].map( it=> <CalcButton key={it} disabled={!editing && !editingQT} style={btnStyle} text={it} onClick={e=>changeInput(it,e)}/>)}
                                 <div className="col-sm-3"/>
                             </div>
                             <div className="row mt-1">
-                                {[7,8,9].map( ite => <CalcButton disabled={!editing && !editingQT} style={btnStyle} text={ite} onClick={(e)=> changeInput(ite,e)} />)}
+                                {[7,8,9].map( ite => <CalcButton key={ite} disabled={!editing && !editingQT} style={btnStyle} text={ite} onClick={(e)=> changeInput(ite,e)} />)}
                                 <div className="col-sm-3 calc" onClick={()=> {
                                     if( editingQT===true ) {
                                         setQty('')
@@ -973,27 +996,27 @@ function POS() {
                                     setEditing(false);
                                     setEditingQT(!editingQT);
                                 }}>
-                                    <button className='btn btn-light num w-100' style={{...btnStyle,padding:10}}>
+                                    <button className='btn btn-light num w-100' style={{...btnStyle,padding:10,height:46}}>
                                         <b className='num'>{!editingQT?'Edit Qty':'Done'}</b> 
                                     </button>
                                 </div>
                             </div>
                             <div className="row mt-1">
-                                <div className="col-sm-3 d-none">
-                                    <button className="btn btn-light num w-100 text-dark calc" disabled={!editing && !editingQT} onClick={e => changeInput('.',e)} style={btnStyle}> <b> . </b> </button>
+                                <div className="col-sm-3 d-none calc">
+                                    <button className="btn btn-light num w-100 text-dark " disabled={!editing && !editingQT} onClick={e => changeInput('.',e)} style={btnStyle}> <b> . </b> </button>
                                 </div>
-                                <div className="col-sm-3 offset-3">
-                                    <button className="btn btn-light num w-100 text-dark calc" disabled={!editing && !editingQT} onClick={e=> changeInput(0, e)} style={btnStyle}> <b> 0 </b> </button>
+                                <div className="col-sm-3 offset-3 calc">
+                                    <button className="btn btn-light num w-100 text-dark " disabled={!editing && !editingQT} onClick={e=> changeInput(0, e)} style={btnStyle}> <b> 0 </b> </button>
                                 </div>
-                                <div className="col-sm-3">
+                                <div className="col-sm-3 calc">
                                     <button className="btn btn-light num w-100 text-dark" disabled={!editing && !editingQT} onClick={e=>changeInput('clear',e)} style={{...btnStyle,padding:'15px 10px'}}> <b>Reset</b> </button>
                                 </div>
-                                <div className="col-sm-3" onClick={(e)=> {
+                                <div className="col-sm-3 calc" onClick={(e)=> {
                                     setEditingQT(false)
                                     setEditing(!editing)
                                 }}>
-                                    <button className="btn btn-light num w-100 text-dark" style={{...btnStyle,padding:10}}> 
-                                        <b className='num'> {!editing?'Edit Price':'Done'} </b> 
+                                    <button className="btn btn-light num w-100 text-dark" style={{...btnStyle,padding:'5px 0px',height:46}}> 
+                                        {!editing?'Edit Price':'Done'} 
                                     </button>
                                 </div>
                             </div>
@@ -1046,23 +1069,32 @@ function POS() {
                         }
                     </div>)}
                 </div>: 
-                <div className='library d-grid justify-content-center align-items-center w-100'>
-                    <center>
-                        <img src={logo} alt="" style={{height:200}}/>
-                        <div style={{width:'100%'}}>
-                            <div style={{textAlign:'center',marginTop:10}}>
-                                <h5 style={{textTransform:'uppercase'}}>
-                                    <h3 style={{ paddingTop:10, fontWeight:650, wordSpacing:10 }}>
-                                        &#x1F6D2; Grote Berg  38 <br/> 5611 KL Eindhoven, Netherlands <br/>
-                                        &#x260E; 040-7850081 <br/>
-                                    </h3>
-                                    <h3 style={{textTransform:'uppercase'}}>
-                                        <b>www.Sardarji.nl</b>
-                                    </h3>
-                                </h5>
+                <div className='col-md-6'>
+                    <div className="row">
+                        <div className="col-12 text-center">
+                            <div>
+                                <img src={whatsapp} alt="" style={QR} />
                             </div>
                         </div>
-                    </center>
+                        <div className="col-12 text-center">
+                            <h1 style={cFont}>Thanks For Choosing 
+                                <br />
+                            Indian Food Store
+                            <br />
+                            <b style={sCfont}>Sardar Ji (Since 1976)</b>
+                            </h1>
+                        </div>
+                        <div className="col-12 text-center">
+                            <div className="row">
+                                <div className="col-6">
+                                    <img src={insta} alt="" style={QR}/>
+                                </div>
+                                <div className="col-6">
+                                    <img src={fb} alt="" style={QR}/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 }
             </div>
@@ -1156,7 +1188,7 @@ function POS() {
                                         name='category_id'
                                         onFocus={()=>setFocusedCustom('')}
                                         onClick={()=>setFocusedCustom('')}
-                                        onChange={ e => {setCustom({...custom, category_id: e.value })}}
+                                        onChange={ e => {setCustom({...custom, category_id: e.value, catName: e.label })}}
                                         options={prCategories.map( ca=> ({...ca, value: ca.id, label: ca.name}))}
                                     />
                                 </FormGroup>
@@ -1213,7 +1245,7 @@ function POS() {
                         <Input onChange={e=> setKey(e.target.value)} type='text' name='appKey'/>
                     </ModalBody>
                     <ModalFooter>
-                        <button className='btn btn-light btn-sm btn-rounded' type='button' onClick={()=> setAppModal(!appModal)}>Cancel</button>
+                        <button className='btn btn-light btn-sm btn-rounded' type='button' onClick={()=> {setAppModal(!appModal);setPosition(()=>defPosition)}}>Cancel</button>
                         <button className='btn btn-success btn-sm btn-rounded' > Submit </button>
                     </ModalFooter>
                 </Form>
@@ -1237,7 +1269,9 @@ function POS() {
                             onPointerDown={handleMouseDown}
                             style={innerStyle}
                         >
-                            Hold To Drag 
+                            <Button text={<i className='fa fa-minus'/>} onClick={decrease}/>
+                            <span>Hold To Drag</span> 
+                            <Button text={<i className='fa fa-plus'/>} onClick={increase}/>
                         </div>
                             <Keyboard
                                 onChange={e => setEnteredCash(e)}
@@ -1250,15 +1284,14 @@ function POS() {
                                 }}
                             />
                         <div className='bg-white d-flex board-navs' style={footerStyle}>
-                            <Button text={<i className='fa fa-eraser'/>} onClick={()=> {
+                            <Button text={'CLEAR'} 
+                            onClick={()=> {
                                 setLayout('shift')
                                 setEnteredCash('');
-                                keyboardRef.current.clearInput()
-                            }}/>
-                            <Button text={<i className='fa fa-minus'/>} onClick={decrease}/>
-                            <Button text={`Size: ${Math.round(scale * 100)}%`}/>
-                            <Button text={<i className='fa fa-plus'/>} onClick={increase}/>
-                            <Button onClick={()=>setFocused('')} text={<i className='fa fa-close'/>} />
+                                keyboardRef.current.clearInput();
+                            }}
+                            />
+                            <Button onClick={()=>{setFocused('');setPosition(()=>defPosition)}} text={'CLOSE'} />
                         </div>
                     </div>
                 </div>
@@ -1282,7 +1315,9 @@ function POS() {
                             onPointerDown={handleMouseDown}
                             style={innerStyle}
                         >
-                            Hold To Drag
+                            <Button text={<i className="fa fa-minus"/>} onClick={decrease}/>
+                            <span> Hold To Drag </span>
+                            <Button text={<i className="fa fa-plus"/>} onClick={increase} />
                         </div>
                         <Keyboard
                             onChange={fillCustom}
@@ -1304,17 +1339,14 @@ function POS() {
                             layoutName={layout}
                         />
                         <div className={`bg-white d-flex board-navs ${['price','stock','vStock','vPrice'].includes(focusedCustom) ? 'numeric': ''}`} style={footerStyle}>
-                            <Button text={<i className='fa fa-eraser'/>} 
+                            <Button text={'CLEAR'} 
                             onClick={()=>{
                                 setLayout('shift');
-                                setFocusedCustom('');
+                                // setFocusedCustom('');
                                 setCustom({...custom, [focusedCustom]:''});
                                 ckeyboardRef.current.clearInput();
                             }}/>
-                            <Button text={<i className="fa fa-minus"/>} onClick={decrease}/>
-                            <Button text={`Size: ${Math.round(scale * 100)}%`} />
-                            <Button text={<i className="fa fa-plus"/>} onClick={increase} />
-                            <Button text={<i className="fa fa-close"/>} onClick={()=>setFocusedCustom('')} />
+                            <Button text={'CLOSE'} onClick={()=>{setFocusedCustom('');setPosition(()=>defPosition)}} />
                         </div>
                     </div>
                 </div>
@@ -1340,7 +1372,9 @@ function POS() {
                             onPointerDown={handleMouseDown}
                             style={innerStyle}
                         >
-                            Hold To Drag 
+                            <Button text={<i className='fa fa-minus'/>} onClick={decrease}/>
+                            <span> Hold To Drag </span> 
+                            <Button text={<i className='fa fa-plus'/>}  onClick={increase} />
                         </div>
                         <Keyboard
                             onChange={fillVeg}
@@ -1353,16 +1387,16 @@ function POS() {
                             }}
                             layoutName={layout}
                         />
-                        <div className={`bg-white d-flex board-navs numeric`} style={footerStyle}>
-                            <Button text={<i className='fa fa-eraser'/>} onClick={()=>{
+                        <div className={`bg-white d-flex board-navs numeric`} style={{...footerStyle, gap:8}}>
+                            <Button text={'CLEAR'} onClick={()=>{
                                 setLayout('shift')
                                 setVegetable({...vegetable, price:0.00 })
                                 ckeyboardRef.current.clearInput()
                             }} />
-                            <Button text={<i className='fa fa-minus'/>} onClick={decrease}/>
-                            <Button text={`Size: ${Math.round(scale * 100)}%`}/>
-                            <Button text={<i className='fa fa-plus'/>}  onClick={increase} />
-                            <Button text={<i className='fa fa-close'/>}  onClick={()=>setFocusedVeg('')} />
+                            <Button text={'CLOSE'}  onClick={()=>{
+                                setFocusedVeg('');
+                                setVegetable(null);
+                            }} />
                         </div>
                     </div>
                 </div>
@@ -1386,14 +1420,14 @@ function POS() {
                                             setFocusedVeg(true)
                                         }}
                                         onChange={ e => setVegetable({...vegetable, price: e.target.value}) }
-                                        value={vegetable.price??0}
+                                        value={vegetable.price??0.00}
                                     />
                                 </FormGroup>
                             </Col>
                         </Row>
                     </ModalBody>
                     <ModalFooter className={'justify-content-center'}>
-                        <Col md={5} className='btn btn-light' onClick={()=> {setVegetable(null);setFocusedVeg('')}} >
+                        <Col md={5} className='btn btn-light' onClick={()=> {setVegetable(null);setFocusedVeg('');setPosition(()=>defPosition)}} >
                             Cancel
                         </Col>
                         <Col md={5}>

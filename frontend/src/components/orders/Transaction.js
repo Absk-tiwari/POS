@@ -9,7 +9,6 @@ export const Address = () => {
         <h5 style={{ paddingTop:0, fontWeight:650, textTransform:'uppercase' }}>
             &#x1F6D2; Grote Berg 38 <br/> 5611 KL Eindhoven, Netherlands <br/>
             &#x260E; 040-7850081 <br/>
-            {/* &#x260E; 8884670333 <br/> */}
             www.sardarji.nl
         </h5>
     </div>

@@ -20,11 +20,11 @@ router.get('/', fetchuser, async (req,res) => {
         categories = categories
         .orderByRaw(`
             CASE 
-                WHEN name LIKE 'veg%' THEN 1
-                WHEN name LIKE 'fruits' THEN 2
-                WHEN name LIKE 'extra%' THEN 3
-                WHEN name LIKE 'Rice%' THEN 4
-                WHEN name LIKE 'Floo%' THEN 5
+                WHEN name LIKE 'fresh' THEN 1
+                WHEN name LIKE '%Topop Voucher%' THEN 2
+                WHEN name LIKE '%Habesha%' THEN 3
+                WHEN name LIKE 'Floo%' THEN 4
+                WHEN name LIKE 'Rice%' THEN 5
                 WHEN name LIKE 'Atta%' THEN 6
                 WHEN name LIKE 'Groce%' THEN 7
                 WHEN name LIKE 'Spice%' THEN 8

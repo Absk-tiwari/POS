@@ -11,7 +11,10 @@ export const innerStyle = {
     cursor: "grab",
     textAlign: "center",
     borderRadius: "8px 8px 0 0",
-    touchAction:'none'
+    touchAction:'none',
+    display:'flex',
+    justifyContent:'space-between',
+    alignItems:'center'
 }
 
 export const outerStyle = {

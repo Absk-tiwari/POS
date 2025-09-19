@@ -60,10 +60,10 @@ function Products({
                             <div className={'w-100'} style={{ minHeight: !displayImage && product.category_id !== categories[0].id && 'inherit', color:isColorDark(hexToRgb(catColors[product.category_id]))? 'white':'black', background:catColors[product.category_id]}} >
                                 <strong 
                                     className='wrapped-text' 
-                                    style={{alignContent:'center',fontSize:product.name.length > 18 ? '1rem':'1.15rem'}} 
+                                    style={{alignContent:'center',fontSize:product.name.length > 18 ? '0.8rem':'1rem'}} 
                                 >
-                                    { wrapText(product.name, 100) }
-                                    { product.name.length > 100 && <span className='tooltiptext'>{product.name}</span> }
+                                    { wrapText(product.name, 20) }
+                                    { product.name.length > 20 && <span className='tooltiptext'>{product.name}</span> }
                                 </strong>
                             </div>
                         </div>

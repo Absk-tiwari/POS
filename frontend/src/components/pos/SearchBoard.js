@@ -73,7 +73,9 @@ export default function SearchBoard() {
                         onPointerDown={handleMouseDown}
                         style={innerStyle}
                     >
-                        Hold To Drag 
+                        <button className='btn btn-light btn-rounded foot-btn' onClick={decrease}>-</button>
+                        <span> Hold To Drag </span>
+                        <button className='btn btn-light btn-rounded foot-btn' onClick={increase}> + </button>
                     </div>
                         <Keyboard
                             onChange={onChange}
@@ -84,9 +86,6 @@ export default function SearchBoard() {
                         <button className='btn btn-light btn-rounded foot-btn' 
                             onClick={()=>{setSearchQuery('');keyboardRef.current.clearInput()}}
                         > CLEAR </button>
-                        <button className='btn btn-light btn-rounded foot-btn' onClick={decrease}>-</button>
-                        <span style={{placeContent:'center'}}> {Math.round(scale * 100)}% </span>
-                        <button className='btn btn-light btn-rounded foot-btn' onClick={increase}> + </button>
                         <button onClick={()=>setFocused(!focused)} className='btn btn-light btn-rounded foot-btn'> HIDE </button>
                     </div>
                 </div>

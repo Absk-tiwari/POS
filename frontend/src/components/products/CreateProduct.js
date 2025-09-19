@@ -91,9 +91,13 @@ function CreateProduct() {
         if(!fields.barcode && !fields.category_id) {
             return Warning("Product barcode is required!")
         }
+        const regex = /^(?:Fresh|Topop Voucher|Habesha|Vegetables|Vegetable|Green Vegetables)$/i;
         if(fields.category_id && !fields.barcode) {
             let cat = categories.find(ite => ite.id === parseInt(fields.category_id))
-            if( (cat.name.toLowerCase().indexOf('veg')=== -1 ) && (cat.name.toLowerCase().indexOf('fruit')===-1)) {
+            // if( (cat.name.toLowerCase().indexOf('veg')=== -1 ) && (cat.name.toLowerCase().indexOf('fruit')===-1)) {
+            //     return Warning("Barcode is required!")
+            // }
+            if(!regex.test(cat.name)) {
                 return Warning("Barcode is required!")
             }
         }
@@ -110,7 +114,8 @@ function CreateProduct() {
                 headers:{ 
                     "Accept"       :"application/json",
                     "Content-Type" : "multipart/form-data",
-                    "pos-token"    : localStorage.getItem('pos-token')
+                    "pos-token"    : localStorage.getItem('pos-token'),
+                    "Authorization": localStorage._pos_app_key
                 }
             })
             if(data.status) {
@@ -285,14 +290,10 @@ function CreateProduct() {
                                                             Category
                                                         </div>
                                                         <div className="col-8">
-                                                            <select name="category_id" onChange={change} className="form-control d-none" style={input}>
-                                                                <option value=""> Choose </option>
-                                                                {categories.map( opt => <option key={opt.id} value={opt.id}>{opt.name}</option>)}
-                                                            </select>
                                                             <CreatableSelect
                                                                 onFocus={()=> setFocused('')}
                                                                 options={categories.map(opt => ({...opt, value: opt.id, label: opt.name }))}
-                                                                onChange={ e => setFields({...fields, category_id: e.value})}
+                                                                onChange={ e => setFields({...fields, category_id: e.value, catName: e.label })}
                                                             />
                                                         </div>
                                                     </div>
@@ -414,9 +415,6 @@ function CreateProduct() {
         { focused && !hasKeyboard && <div className='mt-4 position-fixed w-50 v-keyboard' style={{zIndex:9999, top:60 }}>
             <div
                 style={upperStyle}
-                onPointerMove={handleMouseMove}
-                onPointerUp={handleMouseUp}
-                onPointerDown={handleMouseDown}
             >
                 <div
                     style={{ ...outerStyle,
@@ -432,7 +430,9 @@ function CreateProduct() {
                         onPointerDown={handleMouseDown}
                         style={innerStyle}
                     >
-                        Hold To Drag 
+                        <Button text={<i className='fa fa-minus'/>} onClick={decrease}/>
+                        <span>Hold To Drag </span>
+                        <Button text={<i className='fa fa-plus'/>} onClick={increase}/>
                     </div>
                         <Keyboard
                             onChange={onChange}
@@ -457,9 +457,6 @@ function CreateProduct() {
                             setLayout('shift')
                             keyboardRef.current.clearInput()
                         }} />
-                        <Button text=' - ' onClick={decrease}/>
-                        <span style={{placeContent:'center'}}> {Math.round(scale * 100)}% </span>
-                        <Button text=" + " onClick={increase}/>
                         <Button text={"HIDE"} onClick={()=>setFocused('')}/>
                     </div>
                 </div>

@@ -11,7 +11,7 @@ const router = express.Router();
 const fs = require('fs');
 const fetchuser = require('../middlewares/loggedIn');
 const upload = require('../middlewares/multer');
-const { uploadToServer } = require("../utils");
+const { uploadToServer, queueProduct, uploadFile } = require("../utils");
 const User = require("../models/User");
 
 let error = { status : false, message:'Something went wrong!' }
@@ -117,9 +117,7 @@ router.post('/create', [upload.single('image'), fetchuser ], async(req, res) => 
             payload.image = `products/`+ updatedFilename.replace(/\s+/g, '_').trim();
     
             await sharp(req.file.path)
-            .resize(400,400, {
-                fit: 'inside'
-            })
+            .resize(400,400, { fit: 'inside' })
             .webp({ quality:50 })
             .toFile(outputPath);
 
@@ -138,7 +136,6 @@ router.post('/create', [upload.single('image'), fetchuser ], async(req, res) => 
                     fd.append('image', fs.createReadStream(outputPath))
                     fd.append('client', user.application.application_id)
                     const resp = await uploadToServer(fd, axios)
-                    console.log("here is the server response", resp);
 
                 }
 
@@ -154,11 +151,15 @@ router.post('/create', [upload.single('image'), fetchuser ], async(req, res) => 
         }
 
         const product = await Product.query().insertAndFetch(payload);
+        queueProduct('/queue-product', axios, req);
 
-        return res.json({ status:true, message:"Product added successfully!", product: category? {...product, catName: category.name}: product });
+        return res.json({ 
+            status:true, 
+            message:"Product added successfully!", 
+            product: category? {...product, catName: category.name}: product 
+        });
 
     } catch (e) {
-        console.log(e.message)
         error.message = e.message
         return res.status(500).json(error)     
     }
@@ -171,7 +172,7 @@ router.post('/import', [ upload.single('file'), fetchuser ], async(req, res) => 
         const workbook = XLSX.readFile(req.file.path);
         const sheetName = workbook.SheetNames[0]; // Get the first sheet
         const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-
+        const products = []
         for (const row of sheetData) {
  
             const catName = normalizeSpaces(row['Product Category'])
@@ -189,6 +190,7 @@ router.post('/import', [ upload.single('file'), fetchuser ], async(req, res) => 
             }
 
             let product = Product.query().where('added_by', req.body.myID ).where('code', row.Barcode).where('deleted',false).first()
+            let url = null;
             if(product) {
                 await Product.query().insertGraph({
                     code: row.Barcode,
@@ -203,15 +205,23 @@ router.post('/import', [ upload.single('file'), fetchuser ], async(req, res) => 
             } else {
                 await Product.query().findById(product.id).patch({
                     name: row.Name,
-                    price: row['Price'],
+                    price: row['Sales Price'],
                     sales_desc: row['Sales Description'],
                     image: path,  // Use the uploaded path or the default image from Excel
                     category_id: category.id ?? null,  // Associate with the category
                     tax: row['Taxes'] ?? null,  // Handle optional tax field
                 });
             }
+            products.push({
+                barCode: row.Barcode,
+                name: row.Name,
+                price: row['Sales Price'],
+                category: category.name,
+                tax: row['Taxes']??'0%',
+                synced:false
+            })
         }
-        // res.status(200).send('Data successfully imported to the database!');
+        // queueProduct(url, axios, products) // make some other function that carries the bulk payload for products.
         return res.json({status:true, message: 'Products successfully imported!' }); 
 
     } catch (e) {
@@ -221,11 +231,19 @@ router.post('/import', [ upload.single('file'), fetchuser ], async(req, res) => 
 
 });
  
-router.post('/update', upload.single('uploaded'), async(req, res) =>{ // updated function
+router.post('/update', [upload.single('uploaded'),fetchuser], async(req, res) =>{ // updated function
     try { 
-        if((req.body.catName)?.toLowerCase().indexOf('vege') && (req.body.catName)?.toLowerCase().indexOf('fruits') && !req.body.code) return res.json({status:false, message:"Barcode can't be empty!"});
-        const product = await Product.query().where('code', (req.body.code).trim()).where('deleted', false).where('id','!=', req.body.id );
-        if(req.body.code && product.length ) {
+        if((req.body.catName)?.toLowerCase().indexOf('vege') && (req.body.catName)?.toLowerCase().indexOf('fruits') && !req.body.code)
+        {
+            return res.json({status:false, message:"Barcode can't be empty!"});
+        }
+        const product = await Product.query()
+        .where('added_by', req.body.myID)
+        .where('code', (req.body.code).trim())
+        .where('deleted', false)
+        .where('id','!=', req.body.id );
+
+        if(req.body.code && product.length && req.body.id !== product.id) {
             return res.json({status:false, message:"This barcode already exists!"});
         }
         const body = {
@@ -279,15 +297,9 @@ router.post('/update', upload.single('uploaded'), async(req, res) =>{ // updated
             body.category_id = req.body.category_id;
             toSync.category = req.body.catName
         }
-        const {data} = await axios.post(`https://pos.dftech.in/products/update-product`, toSync, {
-            headers: {
-                'Authorization': req.body.appKey??'Vyo0WttjzBTh',
-                'Content-Type': 'application/json'
-            }
-        });
-
         const updated = await Product.query().patchAndFetchById(req.body.id, body);
-        return res.json({ status:true, updated, wasTrue: data.status });
+        const data = await queueProduct('/products/update-product', axios, req);
+        return res.json({ status:true, updated, wasTrue: data?.status });
 
     } catch (e) {
         console.log(e)
@@ -452,7 +464,7 @@ router.post(`/create-custom`, [upload.single('image'),fetchuser], async(req,res)
       
         }
         const product = await Product.query().insertAndFetch(payload);
-
+        await queueProduct('/queue-product', axios, req);
         return res.json({
             status:true, 
             message:"Product has been added!", 
@@ -478,7 +490,6 @@ router.get('/sync/:key', fetchuser, async(req, res) => {
         });
 
         for (const line in products) {
-            
             if (products[line]) { 
                 const row = products[line];
                 if(row && row.name && row.price){ // only start if it has price, name defined
@@ -488,7 +499,6 @@ router.get('/sync/:key', fetchuser, async(req, res) => {
                     let thisTax = row.tax.indexOf(' ')===-1 ? row.tax : (row.tax).split(' '); // its formatted as [num]% or ([num] %) also may contain [num]
                     
                     let tax = await Tax.query().where('amount', typeof thisTax==='object' ? thisTax[0]: thisTax).first()
-                    let taxAmount = null; // this to be used in-place of row.tax (well 'row.tax' is already complete in itself)
                     if(!tax) { // if this type of tax doesnt exist create it.
                         let name="";
                         if(typeof thisTax==='object') {
@@ -514,7 +524,7 @@ router.get('/sync/:key', fetchuser, async(req, res) => {
                                 name: row.name,
                                 price: (row.price.replace(/\s+/g, ''))?.replace(",", ".")??0,
                                 category_id: category?.id??null,
-                                quantity: 5000,
+                                quantity: row.quantity?? 5000,
                                 tax: row.tax
                             })
                         } else {
@@ -524,7 +534,7 @@ router.get('/sync/:key', fetchuser, async(req, res) => {
                                 price: (row.price.replace(/\s+/g, ''))?.replace(",", ".")??0,
                                 category_id: category?.id ?? null,
                                 tax: row.tax ?? null,  // Handle optional tax field
-                                quantity: 5000,
+                                quantity: row.quantity?? 5000,
                                 added_by: req.body.myID
                             })
                         }
@@ -538,7 +548,7 @@ router.get('/sync/:key', fetchuser, async(req, res) => {
                                 price: (row.price.replace(/\s+/g, ''))?.replace(",", ".")??0,
                                 category_id: category?.id ?? null,
                                 tax: row.tax ?? null,  // Handle optional tax field
-                                quantity: 5000,
+                                quantity: row.quantity?? 5000,
                                 added_by: req.body.myID
                             });
                         }
@@ -549,7 +559,11 @@ router.get('/sync/:key', fetchuser, async(req, res) => {
             }
         }
         await axios.get(`https://pos.dftech.in/synced/${req.params.key}`);
-        return res.json({ status:true, message: 'Products successfully imported!', products : products.map( pr => pr.length? JSON.parse(pr): pr)});
+        return res.json({ 
+            status:true,
+            message: 'Products successfully imported!',
+            products : products.map( pr => pr.length? JSON.parse(pr): pr)
+        });
 
     } catch (e) {
         error.message = e.message;

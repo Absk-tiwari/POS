@@ -3,7 +3,6 @@ import { useGetPosProductsQuery } from "../features/centerSlice";
 import { useDispatch, useSelector } from "react-redux";
 import echo from './../echo';
 import axios from "axios";
-import toast from "react-hot-toast";
 
 const SearchContext = createContext();
 
@@ -24,8 +23,6 @@ export const SearchProvider = ({ children }) => {
                 axios.get('/products/sync/'+ appKey).then(({data}) => {
                     if(data.status) dispatch({ type:"MAKE_A_SYNC" });
                 })
-            } else {
-                toast("Maybe products are added!");
             }
         });
     }, []);

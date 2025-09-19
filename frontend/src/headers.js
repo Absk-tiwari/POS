@@ -4,11 +4,13 @@ const headers = () => {
     if(token){
         return {
             'Content-Type' : 'application/json',
-            'pos-token': token
+            'pos-token': token,
+            "Authorization": localStorage._pos_app_key
         }
     }else{
         return {
-            'Content-Type' : 'application/json'
+            'Content-Type' : 'application/json',
+            "Authorization": localStorage._pos_app_key
         }
     }
 }

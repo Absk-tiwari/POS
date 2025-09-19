@@ -282,14 +282,14 @@ export const commonApiSlice = createApi({
 				headers:{ 
 					"Accept"       :"application/json",
 					"Content-Type" : "multipart/form-data",
-					"pos-token": localStorage.getItem('pos-token')
+					"pos-token": localStorage.getItem('pos-token'),
+					"Authorization": localStorage._pos_app_key
 				},
 				body:fd
 			}),
 			async onQueryStarted(_, {dispatch, queryFulfilled}) {
 				try {
-					const {data} = await queryFulfilled;
-					console.log(data)
+					await queryFulfilled;
 				} catch ({error}) {
 					const {status, data} = error
 					if(status===400 && data.message.indexOf('getaddrinfo') !== -1) {

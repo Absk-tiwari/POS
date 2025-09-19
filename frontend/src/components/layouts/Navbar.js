@@ -31,15 +31,16 @@ const sessionCall = async () => {
     }})
     
 }
-
-const Button = ({text, onClick}) => {
-    return <button className={'btn btn-light btn-rounded foot-btn'} onClick={onClick}>{text}</button>
+const defPosition = {
+    x: window.screen.availWidth / 2.9,
+    y: window.screen.availHeight / 2
 }
+const Button = ({text, onClick}) => <button className={'btn btn-light btn-rounded foot-btn'} onClick={onClick}>{text}</button>
 
 function Navbar() {
 
     const {  uploadDB: shouldUploadDB, cartProducts, split:splitStat, appKey, inventory, categories, theme, 
-    hasKeyboard, allProds, openingCash, settings, loading, myInfo } = useSelector( state => state.auth );
+    hasKeyboard, allProds, settings, loading, myInfo } = useSelector( state => state.auth );
     const [ key, setKey] = useState(appKey);
 
     const headers = {
@@ -52,7 +53,6 @@ function Navbar() {
     const [filling, setFilling ] = useState(false);
     
     const { data } = useGetNotificationsQuery();
-    const [ position, setPosition ] = useState({x: window.screen.availWidth / 4, y: window.screen.availHeight / 2 });
     const [ dragging, setDragging ] = useState(false);
     const [ offset, setOffset ] = useState({  x: 0, y: 0  });
     const [ layoutName, setLayout ] = useState('default');
@@ -60,6 +60,7 @@ function Navbar() {
     
     const onChangeKey = input => setKey(input);
     const keyboardRef = useRef(null);
+    const [ position, setPosition ] = useState(defPosition);
     const [scale, setScale] = useState(localStorage.getItem('_keyboard_scale')??1); // Default scale (1 = 100%)
     const decrease = () => {
         localStorage.setItem('_keyboard_scale', Math.max(scale - 0.1, 0.5))
@@ -96,10 +97,17 @@ function Navbar() {
         backgroundColor: 'transparent',
         borderBottom: '1px solid #212121',
         borderRadius: 0,
-        paddingLeft: '30px',
+        paddingLeft: 30,
         cursor: 'text',
         outline: 0,
-        width: '140px'
+        width: 140
+    }
+    const [full, setFull] = useState(true);
+    const toggleScreen = e => {
+        setFull(full => !full)
+        if(window.electronAPI) {
+            window.electronAPI.toggleFullscreen(full)
+        }
     }
 
     const changeTheme = () => {
@@ -214,7 +222,7 @@ function Navbar() {
     const [ total, setTotal ] = useState(0);
     const [ wasUpdate, setWasUpdate ]= useState(false)
     const [ orderProducts, setOrderProducts] = useState([]);
-    const [ packedQuick, setPacked ] = useState({ id:'quick', name:'Others', price:0.0, stock:1, other:true, weight:null });
+    const [ packedQuick, setPacked ] = useState({ id:'quick', name:'Others', price:0, stock:1, other:true, weight:null });
 
     const dispatch = useDispatch();
     
@@ -287,7 +295,7 @@ function Navbar() {
         let btn = document.querySelector('.split-btn')
         dispatch({
             type: 'SPLIT',
-            payload: btn.classList.contains('btn-outline-success')
+            payload: btn.classList.contains('btn-outline')
         })
     }
 
@@ -303,8 +311,8 @@ function Navbar() {
     
     const handleSession = () => {
         // just incrementing on basis of last element of `sessions` array 
-        localStorage.setItem('cartSessions', JSON.stringify([...sessions, sessions[sessions.length-1] + 1]) );
-        setSession([...sessions, sessions[sessions.length-1] + 1])
+        localStorage.setItem('cartSessions', JSON.stringify([...sessions, Number(sessions[sessions.length-1]) + 1]) );
+        setSession([...sessions, Number(sessions[sessions.length-1]) + 1]);
         window.electronAPI?.reloadWindow({manual:true})
     }
 
@@ -421,6 +429,7 @@ function Navbar() {
 
     const handleQuickProduct = (e, submit=false) => {
         if(!submit) {
+            setQuickBoard(()=>true);
             setQuickAddModal(()=>!quickAddModal);
         } else {
             
@@ -530,6 +539,14 @@ function Navbar() {
     
     useEffect(()=> {
         const gar = sessionCall();
+        document.addEventListener("keydown", function(e) {
+            if(e.key === 'Escape') {
+                toggleOrderModal(!orderModal);
+            }
+            if(e.ctrlKey && e.key === 'l') {
+                updateProducts(e);
+            } // shortcut for sync-products
+        });
         initSessions(gar);
     },[])
     
@@ -578,14 +595,12 @@ function Navbar() {
                 <button className="btn btn-outline-success btn-light btn-sm ms-2 quick-btn text-dark" type="button" onClick={lastOrder} >
                     Last Receipt
                 </button>
-                <button className={`btn ${splitStat?'btn-success':'btn-outline-success'} btn-sm ms-2 split-btn text-dark`} type="button" onClick={split} title="Split products"> 
+                <button className={`btn ${splitStat?'btn-success text-white':'btn-outline text-dark'} btn-sm ms-2 split-btn`} type="button" onClick={split} title="Split products"> 
                     Split Products 
                 </button>
                 {
                     window.electronAPI ? 
-                        <button className="btn btn-outline-success btn-light btn-sm ms-2 quick-btn text-dark" type="button" onClick={()=>{
-                            window.electronAPI.drawCash()
-                        }}>
+                        <button className="btn btn-outline-success btn-light btn-sm ms-2 quick-btn text-dark" type="button" onClick={()=> window.electronAPI.drawCash()}>
                             Open drawer
                         </button>
                     :null
@@ -602,6 +617,11 @@ function Navbar() {
             )}
 
             <ul className="navbar-nav ms-auto">
+                <li className="nav-item">
+                    <Link to={'#'} className='nav-link' onClick={toggleScreen}>
+                        <i className={`mdi mdi-fullscreen${full? '-exit':""}`} style={{fontSize:'2rem'}}/>
+                    </Link>
+                </li>
 
                 <li className="nav-item d-flex align-items-center">
                     {theme==='default' && location.pathname==='/pos' && <button className='btn btn-rounded btn-sm btn-warning fs-4' onClick={()=>handleImageDisplay(!displayImage)}> 
@@ -628,7 +648,7 @@ function Navbar() {
                 </>)}
 
                 <li className="nav-item dropdown">
-                    <Link className="nav-link count-indicator" id="notificationDropdown" href="#" data-bs-toggle="dropdown">
+                    <Link className="nav-link count-indicator" id="notificationDropdown" to="" data-bs-toggle="dropdown">
                         <i className="mdi mdi-bell"/>
                         {notifications.length ? <span className="count"/>: null}
                     </Link>
@@ -819,12 +839,11 @@ function Navbar() {
                     }}
                 >
                     <div
-                        onPointerMove={handleMouseMove}
-                        onPointerUp={handleMouseUp}
-                        onPointerDown={handleMouseDown}
                         style={innerStyle}
                     >
-                        Hold To Drag 
+                        <Button text={' - '} onClick={decrease}/>
+                            <span> Hold To Drag </span>
+                        <Button text={' + '} onClick={increase}/>
                     </div>
                         <Keyboard
                             onChange={onChangeKey}
@@ -840,10 +859,7 @@ function Navbar() {
                         />
                     <div className='bg-white d-flex board-navs' style={footerStyle}>
                         <Button text={'CLEAR'} onClick={()=>{setKey('');keyboardRef.current.clearInput()}}/>
-                        <Button text={' - '} onClick={decrease}/>
-                            <span style={{placeContent:'center'}}> {Math.round(scale * 100)}% </span>
-                        <Button text={' + '} onClick={increase}/>
-                        <Button text={'HIDE'} onClick={()=>setFilling('')} />
+                        <Button text={'HIDE'} onClick={()=>{setFilling('');setPosition(()=> defPosition)}} />
                     </div>
                 </div>
             </div>
@@ -869,7 +885,7 @@ function Navbar() {
                                     setQuickField(()=> 'price')
                                 }}
                                 onChange={ e => setPacked({...packedQuick, price: formatAmount(e.target.value)}) }
-                                value={packedQuick.price??0}
+                                value={packedQuick.price??'0.00'}
                             />
                         </FormGroup>
                     </Col>
@@ -895,6 +911,7 @@ function Navbar() {
                 <Col md={5} className='btn btn-light' onClick={()=> {
                     setQuickAddModal(null);
                     setQuickBoard(()=>false);
+                    setPosition(()=>defPosition);
                 }} >
                     Cancel
                 </Col>
@@ -925,7 +942,9 @@ function Navbar() {
                     onPointerDown={handleMouseDown}
                     style={innerStyle}
                 >
-                    Hold To Drag 
+                    <Button text={<i className='fa fa-minus'/>} onClick={decrease}/>
+                    <span> Hold To Drag </span>
+                    <Button text={<i className='fa fa-plus'/>} onClick={increase} />
                 </div>
                     <Keyboard
                         keyboardRef={(r) => (keyboardRef.current = r)}
@@ -941,12 +960,9 @@ function Navbar() {
                     />
                 <div className='bg-white d-flex board-navs numeric' style={footerStyle}>
                     <Button text='CLEAR' onClick={()=>{
-                        setPacked({...packedQuick, [quickField]: ''})
+                        setPacked({...packedQuick, [quickField]: '0.00'})
                         keyboardRef.current?.clearInput();
                     }} />
-                    <Button text=' - ' onClick={decrease}/>
-                    <span style={{placeContent:'center'}}> Size: {Math.round(scale * 100)}% </span>
-                    <Button text=' + ' onClick={increase} />
                     <Button onClick={()=>setQuickBoard(false)} text='HIDE' />
                 </div>
             </div>

@@ -12,7 +12,7 @@ function Category({ categories, products, withAll, cRef, filter, handleDragStart
                 { categories.map((Cat,i) => ( withAll===false ? (products.findIndex( a => a.category_id===parseInt(Cat.id))!==-1) : true ) && (
                     <div key={i} 
                         className={`category-item ${i===currentCat?'active':''}`} 
-                        style={{color:isColorDark(hexToRgb(Cat.color))? 'white':'black',background:Cat.color,minWidth:'150px'}} 
+                        style={{color:isColorDark(hexToRgb(Cat.color))? 'white':'black',background:Cat.color}} 
                         onClick={()=>{filter(Cat.id);setCurrent(i)}}
                         draggable={true}
                         onDragStart={() => handleDragStart(i)}
@@ -27,7 +27,7 @@ function Category({ categories, products, withAll, cRef, filter, handleDragStart
                     Other 
                 </div>
                 <div className='position-fixed t-scroller' style={{bottom:40,right:40}} onClick={scrollTop}>
-                    <button className='btn btn-rounded bg-white' style={{border:"2px dashed"}}>
+                    <button className='btn btn-rounded bg-white' style={{border:"1px dashed"}}>
                         <i className='fa fa-arrow-up'/>
                     </button>
                 </div>
