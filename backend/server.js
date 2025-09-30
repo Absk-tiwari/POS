@@ -5,24 +5,18 @@ const { Model } = require('objection');
 const Knex = require('knex');
 const path = require('path');
 
-// Vyawastha For Sqlite
-
-// const knex = Knex({
-//   client: 'sqlite3',
-//   connection: {
-//     filename: './database/db.sqlite',
-//   },
-//   useNullAsDefault: true,
-// });
-
 const knex = Knex({
     client: 'mysql2',
     connection: {
-        host:"srv1676.hstgr.io",
+        host:"srv1399.hstgr.io",
         user:"u272122742_remote",
         password:"POS@dftech123",
         database:"u272122742_remote",
         port:3306
+    },
+    pool: {
+        min: 2,
+        max: 10
     }
 });
 
@@ -56,14 +50,6 @@ server.get('/install-update', async(req, res)=> {
         const outputFileName = 'update.zip';
         const outputPath = path.join(outputFolder, outputFileName);
 
-        // Download and save file;
-        // axios({ method: 'GET', url, responseType: 'stream' }).then( response => {
-        //     const writer = fs.createWriteStream(outputPath);
-        //     response.data.pipe(writer);
-        //     writer.on('finish', () => console.log('Download completed:', outputPath));
-        //     writer.on('error', err => console.error('Error writing file:', err));
-        // }).catch(err => console.error('Download failed:', err.message));
-
         const {data} = await axios({ method: 'GET', url, responseType: 'stream' });
         const writer = fs.createWriteStream(outputPath);
 
@@ -76,12 +62,10 @@ server.get('/install-update', async(req, res)=> {
             }
         });
 
-        writer.on('error', () => {
-            return res.json({
+        writer.on('error', () => res.json({
                 status:false,
                 message: 'Failed downloading update!'
-            });
-        })
+        }))
         return res.json({
             status:true,
             message: 'UI update installed!'
@@ -98,12 +82,8 @@ server.get('/install-update', async(req, res)=> {
 
 server.get('/check-connection', async(req,res) => {
     knex.raw('SELECT 1')
-    .then(() => {
-        return res.json({status:true, message: '✅ Database connected successfully!'});
-    })
-    .catch((err) => {
-        return res.json({status:false, message: '❌ Database connection failed'});
-    })
+    .then(() => res.json({status:true, message: '✅ Database connected successfully!'}))
+    .catch((err) => res.json({status:false, message: '❌ Database connection failed'}))
 })
 
 server.get("install-backend-update", async(req,res) => {

@@ -94,10 +94,7 @@ function CreateProduct() {
         const regex = /^(?:Fresh|Topop Voucher|Habesha|Vegetables|Vegetable|Green Vegetables)$/i;
         if(fields.category_id && !fields.barcode) {
             let cat = categories.find(ite => ite.id === parseInt(fields.category_id))
-            // if( (cat.name.toLowerCase().indexOf('veg')=== -1 ) && (cat.name.toLowerCase().indexOf('fruit')===-1)) {
-            //     return Warning("Barcode is required!")
-            // }
-            if(!regex.test(cat.name)) {
+            if(!regex.test((cat?.name??'').trim())) {
                 return Warning("Barcode is required!")
             }
         }

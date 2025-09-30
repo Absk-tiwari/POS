@@ -34,6 +34,9 @@ export default function Payment()
         let xyz=[];
         arr.forEach(c=> {
             let index=0
+            if(typeof c.id === 'string' && c.id.indexOf('quick')!== -1) {
+                c = {...c, tax: '9'}
+            }
             let tax = sanitize(c.tax);
             index = xyz.findIndex( p => sanitize(p.tax) === tax);
             // now take the overall price like qt * unit price its in c.prices[c.id]

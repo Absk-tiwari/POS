@@ -92,6 +92,7 @@ router.get('/last-active-session', fetchuser, async(req, res)=> {
         const session = await CashRegister.query().where('user_id', req.body.myID).orderBy('id', 'desc').first();
         return res.json({ status:true, session});
     } catch (error) {
+        console.log(error.message)
         return res.end({ status:false, reason:error.message}, 401);
     }
 })

@@ -232,8 +232,9 @@ router.post('/import', [ upload.single('file'), fetchuser ], async(req, res) => 
 });
  
 router.post('/update', [upload.single('uploaded'),fetchuser], async(req, res) =>{ // updated function
-    try { 
-        if((req.body.catName)?.toLowerCase().indexOf('vege') && (req.body.catName)?.toLowerCase().indexOf('fruits') && !req.body.code)
+    try {
+        const included = /^(?:Fresh|Topop Voucher|Habesha|Vegetables|Vegetable|Green Vegetables|Paneer|Fruits)$/i; 
+        if(!included.test(req.body.catName) && !req.body.code)
         {
             return res.json({status:false, message:"Barcode can't be empty!"});
         }
@@ -486,7 +487,7 @@ router.get('/sync/:key', fetchuser, async(req, res) => {
         products = products.map( pr => {
             if(pr) pr = JSON.parse(pr)
                 else pr = {}
-            return pr
+            return pr;
         });
 
         for (const line in products) {

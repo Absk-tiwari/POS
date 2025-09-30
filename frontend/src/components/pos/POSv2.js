@@ -11,7 +11,6 @@ import toast from 'react-hot-toast';
 import Keyboard from 'react-simple-keyboard' 
 import Category from './Category';
 import Products from './Products';
-// import logo from '../../asset/images/logo.png'
 import logo from '../../asset/images/sardar-logo.png';
 import insta from '../../asset/images/insta-sardarji.png';
 import whatsapp from '../../asset/images/whatsapp-sardarji.png';
@@ -93,7 +92,7 @@ function POS() {
     const [ focused, setFocused] = useState('');
     const [ focusedCustom, setFocusedCustom] = useState('');
     const [ focusedVeg, setFocusedVeg] = useState('');
-
+    const [ options, setOptions ] = useState([])
     const fillCustom = e => {
         const included = /^(?:price|barcode|stock|name)$/;
         if(included.test(focusedCustom)) {
@@ -275,9 +274,8 @@ function POS() {
             cat = product.catName
         }
         const included = /^(?:Fresh|Topop Voucher|Habesha|Vegetables|Vegetable|Green Vegetables|Paneer)$/i;
-        console.log(cat, cat.length)
         //( if it has category & it's between regex then ) + should not be  
-        if( cat && included.test(cat)) {
+        if( cat && included.test(cat.trim())) {
             // ,'sweets','fruits'
             if(!vegetable) {
 
@@ -297,7 +295,7 @@ function POS() {
         let thisProduct = copyKartProducts[activeSession]?.find(ite => ite.id === prID);
         // check if the product is already in cart;
         // new check added it should not be vegetable
-        if( thisProduct && !split && !['vegetables','sweets','fruits'].includes( cat?.trim().toLowerCase()) ) {
+        if( thisProduct && !split && !included.test(cat.trim()) ) {
 
             let canAdd= thisProduct.quantity - availableStocks[prID];
             canAdd = canAdd < 1 ? canAdd : 1;
@@ -497,6 +495,7 @@ function POS() {
     useEffect(()=>{
         if(taxLoaded) {
             setTaxes(dbtaxes.taxes)
+            setOptions(dbtaxes.taxes.map( t => ({...t, value: t.name +' '+t.amount, label: t.name+' '+t.amount})))
         }
         return ()=> null
     },[taxLoaded, dbtaxes])
@@ -569,7 +568,7 @@ function POS() {
             return Warning("Barcode is required!")
         }
         const regex = /^(?:Fresh|Topop Voucher|Habesha|Vegetables|Vegetable|Green Vegetables)$/i;
-        if(!regex.test(custom.catName)) {
+        if(!regex.test((custom.catName).trim())) {
             return Warning("Barcode is required!"); 
         }
 
@@ -1074,6 +1073,7 @@ function POS() {
                         <div className="col-12 text-center">
                             <div>
                                 <img src={whatsapp} alt="" style={QR} />
+                                <h4 className='mt-2'><b>Join our Whatsapp community</b></h4>
                             </div>
                         </div>
                         <div className="col-12 text-center">
@@ -1088,9 +1088,11 @@ function POS() {
                             <div className="row">
                                 <div className="col-6">
                                     <img src={insta} alt="" style={QR}/>
+                                    <h4 className='mt-2'><b>Follow us on Insta</b></h4>
                                 </div>
                                 <div className="col-6">
                                     <img src={fb} alt="" style={QR}/>
+                                    <h4 className='mt-2'><b>Add us on Facebook</b></h4>
                                 </div>
                             </div>
                         </div>
@@ -1154,7 +1156,8 @@ function POS() {
                                         name='tax'
                                         onFocus={()=> setFocusedCustom('')}
                                         onChange={e =>{setCustom({...custom, tax: e.value })}}
-                                        options={taxes.map( t => ({...t, value: t.name +' '+t.amount, label: t.name+' '+t.amount}))}
+                                        defaultValue={options[0]}
+                                        options={options}
                                     />
                                 </FormGroup>
                             </div>

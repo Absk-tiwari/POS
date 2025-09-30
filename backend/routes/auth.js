@@ -6,6 +6,7 @@ const { body, validationResult }=require('express-validator')
 const bcrypt= require('bcrypt');
 const jwt= require('jsonwebtoken');
 const fetchuser= require('../middlewares/loggedIn');
+const Application = require("../models/Application");
 const JWT_SECRET = 'whateverItWas';
 // const knex = require('./../server');
 
@@ -65,12 +66,12 @@ router.post('/login',[
             error.message = "User not found, please create an account to start!"
             return res.status(400).json(error)
         }
-
         const compared = await bcrypt.compare(req.body.password, user.password.replace(/^\$2y\$/, '$2a$')) // .replace(/^\$2y\$/, '$2a$') only if mysql is connection
         if(!compared){
             error.message = "Incorrect Password!";
             return res.status(400).json(error);
         }
+        const client = await Application.query().where('phone', user.phone).first().select('application_id');
         
         let currency = await Currency.query().where('status', true).first();
         if(currency) {
@@ -78,12 +79,20 @@ router.post('/login',[
         }
         const payload = {
             user : {
-                id : user.id
+                id : user.id,
+                appKey: client.application_id 
             }
         }
 
         const authToken = jwt.sign(payload, JWT_SECRET);
-        return res.json({status:true, authToken, user, currency, 'db-upload' : false });
+        return res.json({ 
+            status:true, 
+            authToken,
+            user,
+            currency, 
+            'db-upload' : false,
+            appKey: client.application_id 
+        });
         
     } catch (e) {
         console.log("exception occured: ",e)

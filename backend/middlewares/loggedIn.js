@@ -9,6 +9,7 @@ const loggedIn= (req, res , next)=> {
         }
         const data = jwt.verify(token, JWT_SECRET);
         req.body.myID= data.user.id
+        req.body.application_id = data.user.appKey
         next();
 
     } catch (err){

@@ -41,11 +41,14 @@ export default function Login() {
                 localStorage.setItem('pos-token', data.authToken )
                 localStorage.setItem('pos-user', JSON.stringify(data.user))
 
-                dispatch({ type:'SET_TOKEN', payload: data.authToken }) 
-                dispatch({ type:'SET_AUTH', payload: data.user })  
-                dispatch({ type:'UPLOAD_DB', payload: data['db-upload'] })  
-                dispatch({ type:'SET_ADMIN_STATUS', payload: data.user.type==='admin' })
-                dispatch({ type:'SET_CURRENCY', payload: data.currency });
+                dispatch({ type:'HANDLE_LOGIN', payload: {
+                    currency: data.currency,
+                    adminStatus: data.user.type==='admin',
+                    uploadDB : data['db-upload'],
+                    user: data.user,
+                    token: data.authToken,
+                    appKey: data.appKey
+                } });
                 
                 return navigate('/dashboard')
 

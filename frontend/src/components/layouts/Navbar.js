@@ -17,6 +17,7 @@ import { printDivById } from '../../helpers/attachments';
 import { footerStyle, innerStyle, outerStyle, upperStyle } from '../../objects/keyboard/keyboardStyle';
 import { lowerCase, upperCase } from '../../objects/keyboard/layouts';
 import Transaction, { Address } from '../orders/Transaction';
+import { focusedStyle } from '../../objects/styles';
 
 const themes = {
     default: "/style.css",
@@ -32,7 +33,7 @@ const sessionCall = async () => {
     
 }
 const defPosition = {
-    x: window.screen.availWidth / 2.9,
+    x: window.screen.availWidth / 2.39,
     y: window.screen.availHeight / 2
 }
 const Button = ({text, onClick}) => <button className={'btn btn-light btn-rounded foot-btn'} onClick={onClick}>{text}</button>
@@ -93,15 +94,6 @@ function Navbar() {
 
     const handleMouseUp = () => setDragging(false);
 
-    const focusedStyle = {
-        backgroundColor: 'transparent',
-        borderBottom: '1px solid #212121',
-        borderRadius: 0,
-        paddingLeft: 30,
-        cursor: 'text',
-        outline: 0,
-        width: 140
-    }
     const [full, setFull] = useState(true);
     const toggleScreen = e => {
         setFull(full => !full)
@@ -417,7 +409,7 @@ function Navbar() {
 
     const [ quickAddModal, setQuickAddModal ] = useState(false);
     const [ quickBoard, setQuickBoard ] = useState(false);
-    const [ quickField, setQuickField ] = useState(false);
+    const [ quickField, setQuickField ] = useState('price');
 
     const fillQuick = e => {
         if(quickField==='price') {
@@ -450,6 +442,8 @@ function Navbar() {
             setQuick(() => !quick);
             setQuickBoard(()=>false);
             setQuickAddModal(()=>false);
+            setPosition(()=> defPosition);
+            setPacked({...packedQuick, price: 0});
 
         }
     }
@@ -502,6 +496,9 @@ function Navbar() {
             let xyz=[];
             cp.forEach(c => {
                 let index = 0;
+                if(typeof c.id === 'string' && c.id.indexOf('quick')!== -1) {
+                    c = {...c, tax: '9'}
+                }
                 let tax = sanitize(c.tax); 
                 index = xyz.findIndex( p => sanitize(p.tax) === tax )
                 // now take the overall price like qt * unit price its in c.prices[c.id]
@@ -541,7 +538,7 @@ function Navbar() {
         const gar = sessionCall();
         document.addEventListener("keydown", function(e) {
             if(e.key === 'Escape') {
-                toggleOrderModal(!orderModal);
+                toggleOrderModal(false)
             }
             if(e.ctrlKey && e.key === 'l') {
                 updateProducts(e);

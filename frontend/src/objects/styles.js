@@ -47,3 +47,13 @@ export const basePOS = {
     backgroundColor: '#dadada',
     marginTop:'5%'
 }
+
+export const focusedStyle = {
+    backgroundColor: 'transparent',
+    borderBottom: '1px solid #212121',
+    borderRadius: 0,
+    paddingLeft: 30,
+    cursor: 'text',
+    outline: 0,
+    width: 140
+}

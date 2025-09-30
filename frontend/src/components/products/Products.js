@@ -158,10 +158,12 @@ const Products = () => {
                         Warning("Not connected to internet!");
                     } else {
                         Warning("Product not updated on phone! Try syncing first with correct key");
+                        dispatch({ type:"SET_APP_KEY", payload:"" })
                     }
-                    dispatch({ type:"SET_APP_KEY", payload:"" })
                 }
                 setModal(false)
+                setPlaceholder('')
+                setFocusedField('')
             } else {
                 toast.error(data.message); 
             }

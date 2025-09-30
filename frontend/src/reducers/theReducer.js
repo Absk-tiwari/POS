@@ -298,6 +298,25 @@ const authReducer = (state=initialState,action) => {
                 uploadDB: action.payload
             }
         }
+
+        case "HANDLE_LOGIN" : {
+            const { appKey, adminStatus, currency, user, uploadDB, token } = action.payload
+
+            localStorage.uploadDB = uploadDB
+            localStorage._pos_app_key = appKey
+            localStorage.currency = currency
+            localStorage.setItem('pos-user', JSON.stringify(user));
+            localStorage.setItem('pos-token', token)  
+            return {
+                ...state,
+                appKey,
+                currency,
+                uploadDB,
+                isAdmin: adminStatus,
+                myInfo : user,
+                userToken: token
+            }
+        }
     }
 }
 
