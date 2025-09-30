@@ -38,5 +38,5 @@ export const fullDisplay = {
 }
 
 export const bkspDisplay = { 
-    "{bksp}":"x", 
+    "{bksp}":"backspace", 
 }

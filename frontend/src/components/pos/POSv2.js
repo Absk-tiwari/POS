@@ -31,7 +31,7 @@ const CalcButton = ({onClick=()=>{}, disabled, text, style}) => {
         </button>
     </div>
 }
-const defPosition = {
+export const defPosition = {
     x: window.screen.availWidth / 2.9,
     y: window.screen.availHeight / 2
 }
@@ -489,12 +489,10 @@ function POS() {
         return () => setBarcode('')
     },[barcode])
 
-    const [taxes, setTaxes] = useState([]);
     const { data:dbtaxes, isSuccess:taxLoaded } = useGetTaxesQuery();
 
     useEffect(()=>{
         if(taxLoaded) {
-            setTaxes(dbtaxes.taxes)
             setOptions(dbtaxes.taxes.map( t => ({...t, value: t.name +' '+t.amount, label: t.name+' '+t.amount})))
         }
         return ()=> null

@@ -10,14 +10,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { Modal, ModalHeader, ModalFooter, ModalBody, FormGroup, Form } from 'reactstrap';
 import { bkspDisplay, footerStyle, innerStyle, outerStyle, upperStyle } from '../../objects/keyboard/keyboardStyle';
-import { numeric } from '../../objects/keyboard/layouts';
+import { numeric, numWithout } from '../../objects/keyboard/layouts';
 import { getClientX, getClientY } from '../../helpers/utils';
+import { Button } from '../layouts/Button';
+import { defPosition } from '../layouts/Navbar';
 
 function Configuration() {
     const keyboardRef = useRef();
-    const nav = (url) => {
-        navigator(url)
-    }
+    const nav = (url) => navigator(url)
     const navigator = useNavigate()
     const { currency, stockAlert, theme, hasKeyboard } = useSelector(state => state.auth);
     const [ currencyCatogory, setCurrencyCategory ] = useState(false);
@@ -25,16 +25,6 @@ function Configuration() {
     const [ minStock, setAlert ] = useState(stockAlert)
     const [ focused, setFocused ] = useState(false)
     const dispatch = useDispatch();
-    const updateCurrency = () => {
-        axios.get("https://api.apilayer.com/exchangerates_data/latest?symbols=EUR&base=INR", {
-            redirect: 'follow',
-            headers: {
-                apikey : "vs3K0OZhqMCEvsgiDYTEj97mfSHKCxn7"
-            }
-        }).then(({data}) => console.log(data))
-        .then(result => console.log(result))
-        .catch(error => console.log('error', error))
-    }
     
     const updateStockAlert = e => {
         e.preventDefault();
@@ -49,9 +39,7 @@ function Configuration() {
         }).catch(()=>toast.error("Something went wrong!"))
     }
     
-    useEffect(()=>{});
-    
-    const [ position, setPosition ] = useState({ x: window.screen.availWidth/4, y: window.screen.availHeight / 2 });
+    const [ position, setPosition ] = useState(defPosition);
     const [ dragging, setDragging ] = useState(false);
     const [ offset, setOffset ] = useState({ x: 0, y: 0 });
     
@@ -105,8 +93,8 @@ function Configuration() {
                             <div className="card-body">
                                 {theme==='default' ? 
                                 <div className="d-flex" title={"Categories"} style={senty}>
-                                    <div style={{width:'70px', textAlign:'center'}}>
-                                        <img src={category} height="80" alt=''/> 
+                                    <div style={{textAlign:'center'}}>
+                                        <img src={category} height="100" alt=''/> 
                                     </div>
                                 </div>
                                 : <h1 style={{fontSize:'3rem'}}>Category</h1>}
@@ -115,13 +103,13 @@ function Configuration() {
                         {theme==='default' && <h5 className="pt-3 fs-2">Category</h5>}
                     </div>
                     <div className="text-center col-4">
-                        <Link to={'/config/taxes'} className="card redirect tablink" onClick={nav('/config/taxes')} 
-                            onPointerUp={nav('/config/taxes')} title={"Taxes"}>
+                        <Link to={'/config/taxes'} className="card redirect tablink" onClick={()=>nav('/config/taxes')} 
+                            onPointerUp={()=>nav('/config/taxes')} title={"Taxes"}>
                             <div className="card-body">
                                 {theme==='default' ? 
                                 <div className="d-flex" title={"Taxes"} style={senty}>
-                                    <div style={{width:'70px', textAlign:'center'}} >
-                                        <img src={tax} height="80" alt={''}/> 
+                                    <div style={{textAlign:'center'}} >
+                                        <img src={tax} height="100" alt={''}/> 
                                     </div>
                                 </div>
                                 : <h1>Tax</h1>}
@@ -131,12 +119,12 @@ function Configuration() {
                     </div>
                    
                     <div className="text-center col-4">
-                        <div className="card redirect tablink" onClick={()=> setStockModal(!stockModal)} title={"Set stock alert"}>
+                        <div className="card redirect tablink" onClick={(e)=> {setStockModal(!stockModal);e.stopPropagation()}} >
                             <div className="card-body">
                             {theme==='default' ?
                                 <div className="d-flex" title={"Set stock alert"} style={senty}>
-                                    <div style={{width:'70px', textAlign:'center'}} >
-                                        <img src={alert} height="80" alt='' /> 
+                                    <div style={{textAlign:'center'}} >
+                                        <img src={alert} height="100" alt='' /> 
                                     </div>
                                 </div>
                             : <h1 style={{fontSize:'2.5rem'}}>Stock Alert</h1>}
@@ -146,13 +134,13 @@ function Configuration() {
                     </div>
                     
                     <div className="text-center col-4">
-                        <Link to={'/notes'} className="card redirect tablink" onClick={nav('/notes')} 
-                            onPointerUp={nav('/notes')} title="Add payment notes">
+                        <Link to={'/notes'} className="card redirect tablink" onClick={()=>nav('/notes')} 
+                            onPointerUp={()=>nav('/notes')} title="Add payment notes">
                             <div className="card-body">
                                 {theme==='default' ? 
                                 <div className="d-flex" title="Add payment notes" style={senty}>
-                                    <div style={{width:'70px', textAlign:'center'}} >
-                                        <img src={notes} height="80" alt=''/> 
+                                    <div style={{textAlign:'center'}} >
+                                        <img src={notes} height="100" alt=''/> 
                                     </div>
                                 </div>
                                 : <h1>Notes</h1>}
@@ -171,7 +159,7 @@ function Configuration() {
             </ModalHeader>
             <ModalBody>
                 <div className="form-group">
-                    <select name="currency" id="currency" className="form-control" onChange={updateCurrency}>
+                    <select name="currency" id="currency" className="form-control" onChange={()=>{}}>
                         <option value="euro" {...currency === '€ ' ? 'selected':''} > Euro </option>
                         <option value="inr" {...currency === '₹ ' ? 'selected':''} > INR </option>
                     </select>
@@ -210,12 +198,10 @@ function Configuration() {
             focused && !hasKeyboard && <div className='mt-4 position-fixed w-50' style={{ zIndex:9999, top:60 }}>
             <div
                 style={upperStyle}
-                onPointerMove={handleMouseMove}
-                onPointerUp={handleMouseUp}
-                onPointerDown={handleMouseDown}
             >
                 <div
                     style={{ ...outerStyle,
+                        width:400,
                         top: `${position.y}px`,
                         left: `${position.x}px`,
                         cursor: dragging ? "grabbing" : "grab",
@@ -228,23 +214,22 @@ function Configuration() {
                         onPointerDown={handleMouseDown}
                         style={innerStyle}
                     >
-                        Hold To Drag 
+                        <Button text={<i className='fa fa-minus'/>} onClick={decrease}/>
+                        <span> Hold To Drag </span>
+                        <Button text={<i className='fa fa-plus'/>} onClick={increase}/>
                     </div>
                         <Keyboard
                             onChange={(e)=>setAlert(e)}
                             keyboardRef={(r) => (keyboardRef.current = r)}
-                            layout={numeric}
+                            layout={{default: numWithout}}
                             display={bkspDisplay}
                         />
                     <div className='bg-white d-flex board-navs' style={footerStyle}>
-                        <button className='btn btn-light btn-rounded foot-btn' onClick={()=>{
+                        <Button onClick={()=>{
                             setAlert('')
                             keyboardRef.current.clearInput()
-                        }}> CLEAR </button>
-                        <button className='btn btn-light btn-rounded foot-btn' onClick={decrease}>-</button>
-                        <span> Size: {Math.round(scale * 100)}% </span>
-                        <button className='btn btn-light btn-rounded foot-btn' onClick={increase}>+</button>
-                        <button onClick={()=>setFocused('')} className='btn btn-light btn-rounded foot-btn'>HIDE</button>
+                        }} text={'CLEAR'}/>
+                        <Button onClick={()=>setFocused('')} text={'HIDE'} />
                     </div>
                 </div>
             </div>

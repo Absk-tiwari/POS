@@ -32,7 +32,7 @@ const sessionCall = async () => {
     }})
     
 }
-const defPosition = {
+export const defPosition = {
     x: window.screen.availWidth / 2.39,
     y: window.screen.availHeight / 2
 }
