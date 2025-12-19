@@ -9,7 +9,7 @@ let openingCash = {};
 const cashAmount = Object.keys(openingCash).length? parseFloat((openingCash.opening_cash).replace('€ ','')): 0;
 const appKey = localStorage.getItem('_pos_app_key')??'';
 const inventory = JSON.parse(localStorage.getItem('INVENTORY_IS')??'true');
-const uploadDB = JSON.parse( localStorage.uploadDB ?? 'false');
+const uploadDB = false;
 
 const headers = {
     headers: {
@@ -302,9 +302,9 @@ const authReducer = (state=initialState,action) => {
         case "HANDLE_LOGIN" : {
             const { appKey, adminStatus, currency, user, uploadDB, token } = action.payload
 
-            localStorage.uploadDB = uploadDB
-            localStorage._pos_app_key = appKey
-            localStorage.currency = currency
+            localStorage.setItem('uploadDB',uploadDB) 
+            localStorage.setItem('_pos_app_key', appKey)
+            localStorage.setItem('currency', currency) 
             localStorage.setItem('pos-user', JSON.stringify(user));
             localStorage.setItem('pos-token', token)  
             return {

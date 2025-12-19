@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { full } from '../../objects/keyboard/layouts';
 import { footerBorder, footerStyle, fullDisplay, innerStyle, outerStyle, upperStyle } from '../../objects/keyboard/keyboardStyle';
 import { getClientX, getClientY } from '../../helpers/utils';
+import { Button } from '../layouts/Button';
 
 export default function Login() {
 
@@ -159,12 +160,10 @@ export default function Login() {
             {focused && <div className='mt-4 position-fixed w-50' style={{zIndex:9999, top:60 }}>
                 <div
                     style={upperStyle}
-                    onPointerMove={handleMouseMove}
-                    onPointerUp={handleMouseUp}
-                    onPointerDown={handleMouseDown}
                 >
                     <div
                         style={{...outerStyle,
+                            width: 540,
                             transform: `scale(${scale})`, 
                             top: `${position.y}px`,
                             left: `${position.x}px`,
@@ -177,7 +176,9 @@ export default function Login() {
                             onPointerDown={handleMouseDown}
                             style={innerStyle}
                         >
-                            Hold To Drag 
+                            <Button text={<i className='fa fa-minus'/>} onClick={decrease}/>
+                                <span> Hold To Drag </span>
+                            <Button text={<i className='fa fa-plus'/>} onClick={increase}/>
                         </div>
                             <Keyboard
                                 onChange={onChange}
@@ -197,11 +198,6 @@ export default function Login() {
                             }} style={footerBorder}>
                                 CLEAR
                             </button>
-
-                            <button style={footerBorder} className='btn btn-light btn-rounded' onClick={decrease}>-</button>
-                                <span style={{placeContent:'center'}}> Size: {Math.round(scale * 100)}% </span>
-                            <button style={footerBorder} className='btn btn-light btn-rounded' onClick={increase}>+</button>
-
                             <button onClick={()=>setFocused('')} className='btn btn-light btn-rounded' style={footerBorder}>HIDE</button>
                         </div>
                     </div>

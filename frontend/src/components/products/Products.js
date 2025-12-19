@@ -16,6 +16,7 @@ import 'select2/dist/css/select2.min.css';
 import { footerStyle, innerStyle, outerStyle, upperStyle } from "../../objects/keyboard/keyboardStyle";
 import { lowerCase, numPad, upperCase } from "../../objects/keyboard/layouts";
 import { productLabelStyle } from "../../objects/styles";
+import { Button } from "../layouts/Button";
 let listTable
 let deleting = false;
 let copyRowData=[]
@@ -114,7 +115,7 @@ const Products = () => {
                     'Accept': 'application/json',
                     "Content-Type" : "multipart/form-data",
                     'pos-token' : localStorage.getItem('pos-token'),
-                    'Authorization': localStorage._pos_app_key
+                    'Authorization': localStorage.getItem('_pos_app_key')
                 }
             });
             if(data.status) {
@@ -154,11 +155,12 @@ const Products = () => {
                     })
                 )
                 if(!data.wasTrue) {
+                    console.log(data);
                     if(data.code==='ENOTFOUND') {
                         Warning("Not connected to internet!");
                     } else {
                         Warning("Product not updated on phone! Try syncing first with correct key");
-                        dispatch({ type:"SET_APP_KEY", payload:"" })
+                        // dispatch({ type:"SET_APP_KEY", payload:"" })
                     }
                 }
                 setModal(false)
@@ -520,6 +522,15 @@ const Products = () => {
         }
         return ()=> setRowData([])
     },[isSuccess, data])
+
+    const decrease = () => {
+        localStorage.setItem('_keyboard_scale', Math.max(scale - 0.1, 0.5))
+        setScale(prev => Math.max(prev - 0.1, 0.5))
+    }
+    const increase = () => {
+        localStorage.setItem('_keyboard_scale', Math.min(JSON.parse(scale) + 0.1, 2))
+        setScale(prev => Math.min(prev + 0.1, 2))
+    }
   
     return (
         <> 
@@ -637,12 +648,10 @@ const Products = () => {
                     {focusedField && !hasKeyboard &&  <div className='mt-4 position-fixed w-50' style={{zIndex:9999, top:60 }}>
                         <div
                             style={upperStyle}
-                            onPointerMove={handleMouseMove}
-                            onPointerUp={handleMouseUp}
-                            onPointerDown={handleMouseDown}
                         >
                             <div
                                 style={{...outerStyle,
+                                    width: 400,
                                     top: `${position.y}px`,
                                     left: `${position.x}px`,
                                     cursor: dragging ? "grabbing" : "grab",
@@ -655,7 +664,9 @@ const Products = () => {
                                     onPointerDown={handleMouseDown}
                                     style={innerStyle}
                                 >
-                                    Hold To Drag 
+                                    <Button text={<i className='fa fa-minus'/>} onClick={decrease}/>
+                                    <span>Hold To Drag </span>
+                                    <Button text={<i className='fa fa-plus'/>} onClick={increase}/>
                                 </div>
                                     <Keyboard
                                         onChange={onChange}
@@ -679,9 +690,6 @@ const Products = () => {
                                         setEditingProduct({...editingProduct,[focusedField]:''})
                                         keyboardRef.current.clearInput()
                                     }}> CLEAR </button>
-                                    <button className='btn btn-light btn-rounded foot-btn' onClick={() => setScale(prev => Math.max(prev - 0.1, 0.5))}>-</button>
-                                    <span style={{placeContent:'center'}}> Size: {Math.round(scale * 100)}% </span>
-                                    <button className='btn btn-light btn-rounded foot-btn' onClick={() => setScale(prev => Math.min(prev + 0.1, 2))}>+</button>
                                     <button onClick={()=>setFocusedField('')} className='btn btn-light btn-rounded foot-btn'>HIDE</button>
                                 </div>
                         </div>

@@ -20630,7 +20630,7 @@ dl li:not(.select2-results li) {
 }
 
 .navbar .navbar-menu-wrapper .navbar-nav .nav-item {
-    margin-left: 1.25rem
+    margin-left: 1.25rem;
 }
 
 @media(max-width:992px) {
@@ -22325,7 +22325,7 @@ body {
     cursor: pointer;
     transition: 0.32s ease;
 }
-
+.grid-product .cell img{min-height: 15vh;}
 .navbar-menu-wrapper.d-flex {
     align-items: center;
 }
@@ -22752,4 +22752,12 @@ body::-webkit-scrollbar {
 }
 .btn-outline {
     border: 1px solid black;
+}
+.navbar-menu-wrapper button.btn {
+    padding: 15px 15px!important;
+    font-size: 1.2rem!important;
+    font-weight: 900!important;
+}
+.grid-product {
+    padding: 10px!important;
 }

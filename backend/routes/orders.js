@@ -274,6 +274,7 @@ async function generateReport(payload) {
             orders = await Order.query()
             .join('cashier_sessions as cs', 'orders.id', 'cs.order_id')
             .where('cs.cash_register_id', payload.register_id)
+            // .whereNotIn('orders.id', [1819,1833,1864,1793])
             .select('*');
         }
     } else {
@@ -289,7 +290,7 @@ async function generateReport(payload) {
         // if(order.transaction_type==='credit') 
         // {
             let products = Array.from(new Set(orderData.products));
-            total += orderData.total;
+            total = total + Number(orderData.total);
             let QT = orderData.quantity;
             let quickProduct = orderData.otherAmount || null;
             const sPrice = orderData.price || null // just rates to show category-wise
@@ -300,15 +301,15 @@ async function generateReport(payload) {
                     continue;
                 }
                 let product = await Product.query()
-                    .withGraphFetched('category')
+                    // .withGraphFetched('category')
                     .findById(id)
-                    .select('category_id', 'price', 'tax');
+                    .select('price', 'tax');
     
                 if (product?.tax) {
                     let [value, type] = product.tax.split(' ');
                     if (!taxes[type??'Other']) taxes[type??'Other'] = value;
                 }
-    
+                /* 
                 if (!product?.category) {
                     categories['Others'] = categories['Others'] ? categories['Others'] + ((sPrice[id]??product.price) * QT[id]): ((sPrice[id]??product.price) * QT[id]);
                     qt['Others'] = (parseFloat(qt['Others']) || 0) + QT[id];
@@ -316,6 +317,7 @@ async function generateReport(payload) {
                     categories[product.category.name] = (categories[product.category.name] || 0) + (sPrice?.[id]??product.price * QT[id]);
                     qt[product.category.name] = (parseInt(qt[product.category.name]) || 0 ) + QT[id];
                 }
+                */
             }
     
             totalProducts += Object.values(QT).reduce((sum, qty) => sum + parseInt(qty), 0);
@@ -330,17 +332,17 @@ async function generateReport(payload) {
             discounts += finalTax.reduce((a,b) => a + (sPrice[b.id] - b.price),0)
 
             if (order.payment_mode === 'Cash') {
-                cash += orderData.total;
+                cash = cash + Number(orderData.total);
             } else if (order.payment_mode === 'Card') {
-                card += orderData.total;
+                card = card + Number(orderData.total);
             } else if(order.payment_mode === 'Account') {
-                account+= orderData.total;
+                account = account + Number(orderData.total);
             } else {
                 if(orderData.modes) {
                     const { Cash, Card, Account, ogCash } = orderData.modes;
-                    cash += ogCash? parseFloat(ogCash): parseFloat(Cash)
-                    card += parseFloat(Card)
-                    account += parseFloat(Account)
+                    cash = cash + ((ogCash && Number(ogCash) < Number(Cash))? Number(ogCash): Number(Cash))
+                    card = card + Number(Card)
+                    account = account + Number(Account)
                 }
             }
         // } else {
@@ -356,7 +358,7 @@ async function generateReport(payload) {
         total_customers: customers.length,
         return_amount: returns,
         total_tax: tax,
-        total_amount: parseFloat(total),
+        total_amount: total,
         cash: parseFloat(cash),
         card: parseFloat(card),
         account: parseFloat(account),
@@ -395,11 +397,11 @@ async function generateReport(payload) {
             }
         });
 
-        await Report.query().insert({
-            path,
-            date: europeanDate(),
-            user_id: payload.myID
-        });
+        // await Report.query().insert({
+        //     path,
+        //     date: europeanDate(),
+        //     user_id: payload.myID
+        // });
         
     } 
     

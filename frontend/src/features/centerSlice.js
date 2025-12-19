@@ -11,7 +11,7 @@ export const commonApiSlice = createApi({
 			headers.set('Accept','application/json' ) 
 			headers.set('Content-Type', 'application/json') 
 			headers.set("pos-token", localStorage.getItem('pos-token')) 
-			headers.set("Authorization", `Bearer ${localStorage.getItem('pos-token')}`) 
+			// headers.set("Authorization", `Bearer ${localStorage.getItem('pos-token')}`) 
 			return headers
 		}
 	}),
@@ -283,7 +283,7 @@ export const commonApiSlice = createApi({
 					"Accept"       :"application/json",
 					"Content-Type" : "multipart/form-data",
 					"pos-token": localStorage.getItem('pos-token'),
-					"Authorization": localStorage._pos_app_key
+					"Authorization": localStorage.getItem('_pos_app_key')
 				},
 				body:fd
 			}),

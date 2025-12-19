@@ -5,12 +5,12 @@ const headers = () => {
         return {
             'Content-Type' : 'application/json',
             'pos-token': token,
-            "Authorization": localStorage._pos_app_key
+            "Authorization": localStorage.getItem('_pos_app_key')
         }
     }else{
         return {
             'Content-Type' : 'application/json',
-            "Authorization": localStorage._pos_app_key
+            "Authorization": localStorage.getItem('_pos_app_key')
         }
     }
 }

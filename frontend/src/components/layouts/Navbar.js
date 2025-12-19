@@ -18,6 +18,7 @@ import { footerStyle, innerStyle, outerStyle, upperStyle } from '../../objects/k
 import { lowerCase, upperCase } from '../../objects/keyboard/layouts';
 import Transaction, { Address } from '../orders/Transaction';
 import { focusedStyle } from '../../objects/styles';
+import { defPosition } from '../pos/POSv2';
 
 const themes = {
     default: "/style.css",
@@ -32,23 +33,18 @@ const sessionCall = async () => {
     }})
     
 }
-export const defPosition = {
-    x: window.screen.availWidth / 2.39,
-    y: window.screen.availHeight / 2
-}
 const Button = ({text, onClick}) => <button className={'btn btn-light btn-rounded foot-btn'} onClick={onClick}>{text}</button>
 
 function Navbar() {
 
     const {  uploadDB: shouldUploadDB, cartProducts, split:splitStat, appKey, inventory, categories, theme, 
-    hasKeyboard, allProds, settings, loading, myInfo } = useSelector( state => state.auth );
+    hasKeyboard, allProds, settings, loading, myInfo, userToken } = useSelector( state => state.auth );
     const [ key, setKey] = useState(appKey);
 
     const headers = {
         'Content-Type' : 'application/json',
         'pos-token': localStorage.getItem('pos-token')
     }
-
     const location = useLocation();
     const params = useParams();
     const [filling, setFilling ] = useState(false);
@@ -71,28 +67,6 @@ function Navbar() {
         localStorage.setItem('_keyboard_scale', Math.min(JSON.parse(scale) + 0.1, 2))
         setScale(prev => Math.min(JSON.parse(prev) + 0.1, 2))
     }
-
-    const handleMouseDown = (e) => {
-        setDragging(true);
-        const x = getClientX(e);
-        const y = getClientY(e);
-        setOffset({
-            x: x - position.x,
-            y: y - position.y
-        });
-    }
-
-    const handleMouseMove = (e) => {
-        if (!dragging) return;
-        const x = getClientX(e)
-        const y = getClientY(e);
-        setPosition({
-            x: x - offset.x,
-            y: y - offset.y,
-        });
-    }
-
-    const handleMouseUp = () => setDragging(false);
 
     const [full, setFull] = useState(true);
     const toggleScreen = e => {
@@ -443,7 +417,8 @@ function Navbar() {
             setQuickBoard(()=>false);
             setQuickAddModal(()=>false);
             setPosition(()=> defPosition);
-            setPacked({...packedQuick, price: 0});
+            setQuickField(()=> 'price')
+            setPacked({...packedQuick, price: 0, stock:1 });
 
         }
     }
@@ -545,7 +520,7 @@ function Navbar() {
             } // shortcut for sync-products
         });
         initSessions(gar);
-    },[])
+    },[userToken])
     
     if( params && params.type === 'customer' ) return null;
     
@@ -862,7 +837,7 @@ function Navbar() {
             </div>
         </div>
     }
-    {quickAddModal && <Modal isOpen={true}>
+    {quickAddModal && <Modal isOpen={true} fade={false} style={{marginLeft:1000,top: theme==='retro'? 125: 100}}>
         <Form onSubmit={e => handleQuickProduct(e,true)}>
             <ModalHeader>
                 <small> Add quick product </small> <br/>
@@ -927,20 +902,20 @@ function Navbar() {
             <div
                 style={{...outerStyle,
                     width: 350,
-                    top: `${position.y}px`,
-                    left: `${position.x}px`,
+                    top: `389px`,
+                    left: `1016px`,
                     cursor: dragging ? "grabbing" : "grab",
                     transform: `scale(${scale})`, 
                 }}
             >
                 <div
-                    onPointerMove={handleMouseMove}
-                    onPointerUp={handleMouseUp}
-                    onPointerDown={handleMouseDown}
+                    // onPointerMove={handleMouseMove}
+                    // onPointerUp={handleMouseUp}
+                    // onPointerDown={handleMouseDown}
                     style={innerStyle}
                 >
                     <Button text={<i className='fa fa-minus'/>} onClick={decrease}/>
-                    <span> Hold To Drag </span>
+                    {/* <span> Hold To Drag </span> */}
                     <Button text={<i className='fa fa-plus'/>} onClick={increase} />
                 </div>
                     <Keyboard

@@ -189,31 +189,34 @@ function preview(hasData=null,filename=null, path=false)
     Attachments.preview( hasData, filename, path );
 }
  
-function printDivById(divId) 
+function printDivById(divId,html=false) 
 {
     const content = document.getElementById(divId);
-    const clone = content.cloneNode(true);
+    const clone = content?.cloneNode(true);
     const win = window.open('', '', 'width=800,height=600');
-    win.document.write(`<html><head><title>.</title>
-    <style>
-        .row >* {
-            flex-shrink:0;max-width:90%;padding-right:15px;padding-left:15px;align-items:center;margin-top:0px;
-        }
-        @media print {
-            *{font-family:math}
-            .toHide{display:none!important}
-            .toShow{display:inline!important}
-            .row {border:none!important}
-            .desc {padding-top:15px!important}
-        }
-    </style></head>
-    <body>
-    ${clone.innerHTML}
-    </body></html>`);
-    win.document.close();
-    win.focus();
-    win.print();
-    win.onafterprint = () => win.close();
+    setTimeout(() => {
+        
+        win?.document?.write(`<html><head><title>.</title>
+        <style>
+            .row >* {
+                flex-shrink:0;max-width:90%;padding-right:15px;padding-left:15px;align-items:center;margin-top:0px;
+            }
+            @media print {
+                *{font-family:math}
+                .toHide{display:none!important}
+                .toShow{display:inline!important}
+                .row {border:none!important}
+                .desc {padding-top:15px!important}
+            }
+        </style></head>
+        <body>
+        ${html? html: clone.innerHTML}
+        </body></html>`);
+        win?.document.close();
+        win.focus();
+        win.print();
+        win.onafterprint = () => win.close();
+    }, 100);
 }
 
 export { preview , printDivById }

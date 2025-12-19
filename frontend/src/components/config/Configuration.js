@@ -10,10 +10,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { Modal, ModalHeader, ModalFooter, ModalBody, FormGroup, Form } from 'reactstrap';
 import { bkspDisplay, footerStyle, innerStyle, outerStyle, upperStyle } from '../../objects/keyboard/keyboardStyle';
-import { numeric, numWithout } from '../../objects/keyboard/layouts';
+import { numWithout } from '../../objects/keyboard/layouts';
 import { getClientX, getClientY } from '../../helpers/utils';
 import { Button } from '../layouts/Button';
-import { defPosition } from '../layouts/Navbar';
+import { defPosition } from '../pos/POSv2';
 
 function Configuration() {
     const keyboardRef = useRef();

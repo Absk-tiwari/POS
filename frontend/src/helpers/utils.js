@@ -270,3 +270,12 @@ export const getEuropeanDate = (date=null, type='locale') => {
     if(type==='locale') return date ? new Date(date).toLocaleString("en-US", config) : (new Date()).toLocaleString("en-US", config);
     return date? new Date(date).toISOString("en-US", config): (new Date()).toISOString("en-US", config);
 }
+
+export const time = () => {
+    const now = new Date();
+    const hour = now.getHours(); // 0 - 23
+    if (hour >= 5 && hour < 12) return 'morning';
+    if (hour >= 12 && hour < 17) return 'afternoon';
+    if (hour >= 17 && hour < 21) return 'evening';
+    return 'night';
+}

@@ -33,7 +33,7 @@ export default function Sales() {
     const [ dateOpts, setDateOptions ]= useState([]);
     const [ reportType, setReportType ] = useState('');
     const [ dates, setDates ] = useState({ from:'', to:''});
-    const { currency, openingCash, categories, loading } = useSelector( state => state.auth );
+    const { currency, openingCash, categories, loading, userToken } = useSelector( state => state.auth );
     const keyboardRef = useRef(null);
 
     const setDate = e => {
@@ -118,7 +118,7 @@ export default function Sales() {
     const print = async e => {
         try {
             if(window.electronAPI) {
-                window.electronAPI.printContent({ html: modalBody.current.innerHTML, raw: { orderProducts, order }});
+                window.electronAPI.printContent(modalBody.current.innerHTML);
             } else {
                 printDivById('receipt');
                 Warning("Printer not connected!");
@@ -150,8 +150,13 @@ export default function Sales() {
                 const {data} = await axios.post(`/orders/x-report`, payload);
                 if(data.status) {
                     toast.success(data.message );
-                    if(window.electronAPI) window.electronAPI.printReport(data.html, data.data)
-                    else Warning("Printer not connected!");
+                    if(window.electronAPI){
+                        window.electronAPI.printReport(data.html)
+                    }
+                    else {
+                        Warning("Printer not connected!");
+                        // printDivById('receipt', data.html)
+                    }
                 } else {
                     toast.error(data.message)
                 }
@@ -164,8 +169,13 @@ export default function Sales() {
                     const {data} = await axios.post(`orders/z-report`, payload);
                     if(data.status) {
                         
-                        if(window.electronAPI) window.electronAPI.printReport(data.html, data.data)
-                        else Warning("Printer not connected!");
+                        if(window.electronAPI){
+                            window.electronAPI.printReport(data.html)
+                        }
+                        else {
+                            Warning("Printer not connected!");
+                            // printDivById('receipt', data.html)
+                        }
 
                         localStorage.setItem('cartSessions','[1]');
                         setSession([1])
@@ -188,7 +198,7 @@ export default function Sales() {
     useEffect(()=> {
         axios.get('orders').then(({data}) => setOrders(data.orders)).catch(()=>{})
         return () => null
-    },[])
+    },[userToken])
 
     useEffect(() => {
         let table = $(tableRef.current).DataTable({
@@ -244,7 +254,7 @@ export default function Sales() {
             $(tableRef.current).off('click', 'a')
         }
         
-    },[orders])
+    },[orders, userToken])
 
     const [ preset ] = useState('')
     useEffect(()=> {
@@ -267,7 +277,7 @@ export default function Sales() {
                                     <select name='dates' style={{width:170, borderRadius:20}}>
                                         <option value=""> Filter By Date</option>
                                         <option value=""> Reset </option>
-                                        {dateOpts.map( ro => <option>{ro}</option>)}
+                                        {dateOpts.map( ro => <option key={ro}>{ro}</option>)}
                                     </select>
                                 </div>
                             </div>

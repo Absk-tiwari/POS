@@ -8,6 +8,7 @@
     "bootstrap": "^5.3.3",
     "concurrently": "^9.1.2",
     "cra-template": "1.2.0",
+    "cross-env": "^10.1.0",
     "datatables.net": "^2.2.1",
     "datatables.net-dt": "^2.2.1",
     "dotenv": "^16.4.7",
@@ -28,7 +29,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "cross-env GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test",
     "all": "concurrently \"npm run start\" \"cd ../backend && nodemon server\""
   },

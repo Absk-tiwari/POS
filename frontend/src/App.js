@@ -17,7 +17,7 @@ import { Warning } from "./helpers/utils";
 
 import './echo';
 
-const token = localStorage.getItem('pos-token');
+export const token = localStorage.getItem('pos-token');
 let headers;
 if(token) {
     headers = {
@@ -27,7 +27,6 @@ if(token) {
 } else {
     headers = { 'Content-Type' : 'application/json' }
 }
-
 axios.defaults.baseURL=process.env.REACT_APP_BACKEND_URI??'http://localhost:5101';
 axios.defaults.headers.common = headers;
 

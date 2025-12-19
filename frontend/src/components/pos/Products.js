@@ -1,6 +1,7 @@
 import labelImg from '../../asset/images/default.png';
 import { dealHost, hexToRgb, isColorDark, wrapText } from '../../helpers/utils';
 import addNew from '../../asset/images/image.png';
+import { useRef } from 'react';
 
 function Products({
     products,
@@ -16,6 +17,12 @@ function Products({
     catColors
 }) {
 
+    const grid = useRef();
+    const applyWidth = () => {
+        if(grid?.current?.offsetWidth && chunkSize!==6) {
+            return (grid.current.offsetWidth) / 5
+        }
+    }
     const handleImgError = e => e.target.src = labelImg;
     function isFloat(n) {
         return n === +n && n !== (n|0);
@@ -24,7 +31,7 @@ function Products({
         return parseFloat(n).toFixed(d)
     }
     return (
-    <div className="contents">
+    <div className="contents" ref={grid}>
         {
             Other && (<div className='row mt-3' >
                 <div className={`col-md-2 also`} onClick={()=>toggleModal(!otherOpen)}>
@@ -42,11 +49,12 @@ function Products({
                 </div>
             </div>)
         }
-        { products.map( (row, k) => (<div className={'row mt-3'} key={k}>
+        { products.map( (row, k) => (<div className={'row mt-3'} key={k} >
                 {row.map((product,i ) => (
                     <div key={i} 
-                        className={`col-md-${chunkSize===6?'2':'3'} also ${((product.quantity - product.stock)=== 0 || product.quantity - cartStocks[product.id] === 0 || parseInt(product.quantity)=== 0) && isInventory ? 'stock-out':''}`}  
+                        className={`${chunkSize===6?'col-md-2':'grid-product'} also ${((product.quantity - product.stock)=== 0 || product.quantity - cartStocks[product.id] === 0 || parseInt(product.quantity)=== 0) && isInventory ? 'stock-out':''}`}  
                         onClick={()=> addToCart(product.id, product.catName??'null')} 
+                        style={{ width: applyWidth() }}
                     >
                         <div className={'cell'}
                             style={{minHeight:80}}

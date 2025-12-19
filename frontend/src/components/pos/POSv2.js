@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import CreatableSelect from 'react-select/creatable'
 import { useGetProductCategoriesQuery, useGetPosProductsQuery, commonApiSlice, useGetTaxesQuery } from '../../features/centerSlice';
-import { chunk, Warning, f, getClientY, getClientX } from '../../helpers/utils';
+import { chunk, Warning, f, getClientY, getClientX, time } from '../../helpers/utils';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useSearch } from '../../contexts/SearchContext';
 import { Modal, ModalHeader, ModalBody, ModalFooter, Row, Label, Input, FormGroup, Col, Form } from 'reactstrap';
@@ -19,6 +19,7 @@ import { footerStyle, innerStyle, outerStyle, upperStyle } from '../../objects/k
 import { lowerCase, numeric0, numPad, upperCase } from '../../objects/keyboard/layouts';
 import { Button } from '../layouts/Button';
 import { basePOS, cFont, QR, sCfont } from '../../objects/styles';
+import { useSessions } from '../../hooks/useSession';
 
 let noCodeProducts=[]
 
@@ -32,8 +33,8 @@ const CalcButton = ({onClick=()=>{}, disabled, text, style}) => {
     </div>
 }
 export const defPosition = {
-    x: window.screen.availWidth / 2.9,
-    y: window.screen.availHeight / 2
+    x: window.screen.availWidth / 1.5,
+    y: window.screen.availHeight / 2.10
 }
 
 function POS() {
@@ -48,7 +49,7 @@ function POS() {
 
     const toPayment = () => navigator(`/payment/${activeSession}`)
 
-    const chunkSize = 6 //window.screen.availWidth < 1200? 3 : 4;
+    const chunkSize = 5 //window.screen.availWidth < 1200? 3 : 4;
 
     const { 
         currency, 
@@ -90,7 +91,7 @@ function POS() {
     const [ custom, setCustom] = useState({ image:null, price:'', name:'', barcode:'', stock:5000 });
     // for v-keyboard
     const [ focused, setFocused] = useState('');
-    const [ focusedCustom, setFocusedCustom] = useState('');
+    const [ focusedCustom, setFocusedCustom] = useState('name');
     const [ focusedVeg, setFocusedVeg] = useState('');
     const [ options, setOptions ] = useState([])
     const fillCustom = e => {
@@ -229,7 +230,6 @@ function POS() {
             refetchCategories()
         }
         if(products.length) {
-            toast.success("Products are updated...")
             allProducts.refetch()
         }
     }, [update])
@@ -826,7 +826,7 @@ function POS() {
                         <Modal isOpen={true}>
                             <Form onSubmit={openTheFuckingDay}>
                                 <ModalHeader>
-                                    <b>Day Opening!</b> <p>Good morning </p>
+                                    <b>Day Opening!</b> <p>Good {time()} </p>
                                 </ModalHeader>
                                 <ModalBody>
                                     <Row>
@@ -1098,7 +1098,7 @@ function POS() {
                 </div>
                 }
             </div>
-            <Modal isOpen={otherOpen} fade={false}>
+            <Modal isOpen={otherOpen} fade={false} style={{marginLeft:730}}>
                 <Form onSubmit={addCustomProduct}>
                     <ModalBody style={{padding:20}}>
                         <Row>
@@ -1299,13 +1299,13 @@ function POS() {
             </div>
             }
 
-            {(otherOpen||focusedCustom) && !hasKeyboard && <div className="mt-4 position-fixed w-50" style={{zIndex:9999,top:60}}>
+            {otherOpen && !hasKeyboard && <div className="mt-4 position-fixed w-50" style={{zIndex:9999,top:60}}>
                 <div style={upperStyle}>
                     <div
                         style={{ ...outerStyle,
-                            width: ['price','stock','vStock','vPrice'].includes(focusedCustom)? 420: 700,
+                            width: ['price','stock','vStock','vPrice'].includes(focusedCustom)? 420: 600,
                             top: `${position.y}px`,
-                            left: `${position.x}px`,
+                            left: `${position.x-200}px`,
                             cursor: dragging ? "grabbing" : "grab",
                             transform: `scale(${scale})`
                         }}
@@ -1347,7 +1347,7 @@ function POS() {
                                 setCustom({...custom, [focusedCustom]:''});
                                 ckeyboardRef.current.clearInput();
                             }}/>
-                            <Button text={'CLOSE'} onClick={()=>{setFocusedCustom('');setPosition(()=>defPosition)}} />
+                            <Button text={'CLOSE'} onClick={()=>{setFocusedCustom('');setPosition(()=>defPosition);setModal(false)}} />
                         </div>
                     </div>
                 </div>
@@ -1360,21 +1360,20 @@ function POS() {
                     <div
                         style={{ ...outerStyle,
                             width: 400,
-                            top: `${position.y}px`,
-                            left: `${position.x}px`,
-                            cursor: dragging ? "grabbing" : "grab",
+                            top: `389px`,
+                            left: `1024px`,
                             transform: `scale(${scale})`
                         }}
                         className='numeric'
                     >
                         <div
-                            onPointerMove={handleMouseMove}
-                            onPointerUp={handleMouseUp}
-                            onPointerDown={handleMouseDown}
+                            // onPointerMove={handleMouseMove}
+                            // onPointerUp={handleMouseUp}
+                            // onPointerDown={handleMouseDown}
                             style={innerStyle}
                         >
                             <Button text={<i className='fa fa-minus'/>} onClick={decrease}/>
-                            <span> Hold To Drag </span> 
+                            {/* <span> Hold To Drag </span>  */}
                             <Button text={<i className='fa fa-plus'/>}  onClick={increase} />
                         </div>
                         <Keyboard
@@ -1402,7 +1401,7 @@ function POS() {
                     </div>
                 </div>
             </div>}
-            {vegetable && <Modal isOpen={true}>
+            {vegetable && <Modal isOpen={true} fade={false} style={{marginLeft:1030,top:theme==='retro'? 125: 100}}>
                 <Form onSubmit={addVeg}>
                     <ModalHeader>
                         <b>{vegetable.name}</b>
@@ -1417,9 +1416,7 @@ function POS() {
                                     </Label>
                                     <Input 
                                         type={'text'}
-                                        onClick={(e)=> {
-                                            setFocusedVeg(true)
-                                        }}
+                                        onClick={(e)=> setFocusedVeg(true)}
                                         onChange={ e => setVegetable({...vegetable, price: e.target.value}) }
                                         value={vegetable.price??0.00}
                                     />

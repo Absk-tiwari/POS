@@ -112,7 +112,7 @@ function CreateProduct() {
                     "Accept"       :"application/json",
                     "Content-Type" : "multipart/form-data",
                     "pos-token"    : localStorage.getItem('pos-token'),
-                    "Authorization": localStorage._pos_app_key
+                    "Authorization": localStorage.getItem('_pos_app_key')
                 }
             })
             if(data.status) {

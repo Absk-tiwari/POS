@@ -62,7 +62,7 @@ async function generatePdf(data){
             <div id="receipt" style="width:auto; border-radius: 15px; border:3px dashed gray;">
                 <div style="background-color: white; padding-bottom:40px; border-radius:15px;">
                     <div class="row">
-                        <div class="d-grid text-center w-100 head" style="justify-content:center; width:100%;">
+                        <div class="d-grid text-center w-100 head" style="justify-content:center;width:100%;">
                             <img src="data:image/png;base64,${data.b64}" style="height:50px;">
                             <p>${data.Rtype.toUpperCase()} - Report</p>
                         </div>
@@ -74,7 +74,7 @@ async function generatePdf(data){
                                     <tbody>
                                         ${data.register? 
                                             `<tr><td><b>Opening Cash</b>:</td><td></td><td>${data.register.open}</td></tr>
-                                            <tr><td><b>Closing Cash</b>:</td><td></td><td>${data.register.close}</td></tr>`
+                                            <tr><td><b>Closing Cash</b>:</td><td></td><td>${data.currency + parseFloat((data.register.close).replace(data.currency, '')).toFixed(2)}</td></tr>`
                                         :``}
                                         <tr><td><b>Report Date</b>:</td><td></td><td>${new Date().toLocaleDateString()}</td></tr>
                                         <tr><td><b>Report Time</b>:</td><td></td><td>${new Date().toLocaleTimeString()}</td></tr>
@@ -103,7 +103,7 @@ async function generatePdf(data){
                                 <div class="row d-flex">
                                     <div class="total">
                                         <h2>TOTAL</h2>
-                                        <h2>${data.currency}${data.total_amount.toFixed(2)}</h2>
+                                        <h2>${data.currency}${(data.total_amount).toFixed(2)}</h2>
                                     </div>
                                 </div>
                                 <div class="row d-flex mt-0">
